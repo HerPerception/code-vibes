@@ -50,3 +50,46 @@ func Create(
 
 	return space, nil
 }
+
+func List(
+	ctx context.Context,
+	conn *pgx.Conn,
+	userID int,
+) ([]FinanceSpace, error) {
+	rows, err := conn.Query(
+		ctx,
+		`SELECT id, name, type, user_id
+		 FROM finance_spaces
+		 WHERE user_id = $1
+		 ORDER BY id`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var spaces []FinanceSpace
+
+	for rows.Next() {
+		var space FinanceSpace
+
+		err := rows.Scan(
+			&space.ID,
+			&space.Name,
+			&space.Type,
+			&space.UserID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		spaces = append(spaces, space)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return spaces, nil
+}

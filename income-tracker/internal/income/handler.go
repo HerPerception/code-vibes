@@ -1,9 +1,10 @@
-package finance
+package income
 
 import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"income-tracker/internal/auth"
 
@@ -15,8 +16,11 @@ type Handler struct {
 }
 
 type CreateRequest struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	FinanceSpaceID int     `json:"finance_space_id"`
+	CategoryID     int     `json:"category_id"`
+	Amount         float64 `json:"amount"`
+	DateReceived   string  `json:"date_received"`
+	Description    string  `json:"description"`
 }
 
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -34,27 +38,37 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	space, err := Create(
+	dateReceived, err := time.Parse("2006-01-02", req.DateReceived)
+	if err != nil {
+		http.Error(w, "invalid date format, use YYYY-MM-DD", http.StatusBadRequest)
+		return
+	}
+
+	income, err := Create(
 		r.Context(),
 		h.Conn,
 		userID,
-		req.Name,
-		req.Type,
+		req.FinanceSpaceID,
+		req.CategoryID,
+		req.Amount,
+		dateReceived,
+		req.Description,
 	)
+
 	if err != nil {
-		if errors.Is(err, ErrInvalidType) {
-			http.Error(w, "type must be personal or business", http.StatusBadRequest)
+		if errors.Is(err, ErrFinanceSpaceNotFound) {
+			http.Error(w, "finance space not found", http.StatusNotFound)
 			return
 		}
 
-		http.Error(w, "could not create finance space", http.StatusInternalServerError)
+		http.Error(w, "could not create income", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
-	json.NewEncoder(w).Encode(space)
+	json.NewEncoder(w).Encode(income)
 }
 
 func (h Handler) List(w http.ResponseWriter, r *http.Request) {
@@ -64,16 +78,18 @@ func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	spaces, err := List(
+	incomes, err := List(
 		r.Context(),
 		h.Conn,
 		userID,
 	)
+
 	if err != nil {
-		http.Error(w, "could not get finance spaces", http.StatusInternalServerError)
+		http.Error(w, "could not get income", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(spaces)
+
+	json.NewEncoder(w).Encode(incomes)
 }
