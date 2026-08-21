@@ -8,10 +8,17 @@ import (
 	"os"
 
 	"income-tracker/internal/auth"
+	"income-tracker/internal/categories"
+	"income-tracker/internal/credit_repayments"
+	"income-tracker/internal/credits"
+	"income-tracker/internal/dashboard"
 	"income-tracker/internal/database"
+	"income-tracker/internal/debt_repayments"
+	"income-tracker/internal/debts"
 	"income-tracker/internal/expenses"
 	"income-tracker/internal/finance"
 	"income-tracker/internal/income"
+	"income-tracker/internal/people"
 	"income-tracker/internal/users"
 
 	"github.com/joho/godotenv"
@@ -55,15 +62,43 @@ func main() {
 		Conn: conn,
 	}
 
+	categoryHandler := categories.Handler{
+		Conn: conn,
+	}
+
+	peopleHandler := people.Handler{
+		Conn: conn,
+	}
+
+	debtHandler := debts.Handler{
+		Conn: conn,
+	}
+
+	debtRepaymentHandler := debt_repayments.Handler{
+		Conn: conn,
+	}
+
+	creditHandler := credits.Handler{
+		Conn: conn,
+	}
+
+	creditRepaymentHandler := credit_repayments.Handler{
+		Conn: conn,
+	}
+
+	dashboardHandler := dashboard.Handler{
+		Conn: conn,
+	}
+
 	// --------------------
-	// User routes
+	// Users
 	// --------------------
 
 	http.HandleFunc("POST /users", userHandler.Create)
 	http.HandleFunc("POST /login", userHandler.Login)
 
 	// --------------------
-	// Finance space routes
+	// Finance spaces
 	// --------------------
 
 	protectedCreateFinance := auth.Middleware(
@@ -80,7 +115,41 @@ func main() {
 	http.Handle("GET /finance-spaces", protectedListFinance)
 
 	// --------------------
-	// Income routes
+	// Categories
+	// --------------------
+
+	protectedCreateCategory := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(categoryHandler.Create),
+	)
+
+	protectedListCategory := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(categoryHandler.List),
+	)
+
+	http.Handle("POST /categories", protectedCreateCategory)
+	http.Handle("GET /categories", protectedListCategory)
+
+	// --------------------
+	// People
+	// --------------------
+
+	protectedCreatePerson := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(peopleHandler.Create),
+	)
+
+	protectedListPeople := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(peopleHandler.List),
+	)
+
+	http.Handle("POST /people", protectedCreatePerson)
+	http.Handle("GET /people", protectedListPeople)
+
+	// --------------------
+	// Income
 	// --------------------
 
 	protectedCreateIncome := auth.Middleware(
@@ -97,7 +166,7 @@ func main() {
 	http.Handle("GET /income", protectedListIncome)
 
 	// --------------------
-	// Expense routes
+	// Expenses
 	// --------------------
 
 	protectedCreateExpense := auth.Middleware(
@@ -112,6 +181,85 @@ func main() {
 
 	http.Handle("POST /expenses", protectedCreateExpense)
 	http.Handle("GET /expenses", protectedListExpense)
+
+	// --------------------
+	// Debts
+	// --------------------
+
+	protectedCreateDebt := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(debtHandler.Create),
+	)
+
+	protectedListDebt := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(debtHandler.List),
+	)
+
+	http.Handle("POST /debts", protectedCreateDebt)
+	http.Handle("GET /debts", protectedListDebt)
+
+	// --------------------
+	// Debt repayments
+	// --------------------
+
+	protectedCreateDebtRepayment := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(debtRepaymentHandler.Create),
+	)
+
+	protectedListDebtRepayment := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(debtRepaymentHandler.List),
+	)
+
+	http.Handle("POST /debt-repayments", protectedCreateDebtRepayment)
+	http.Handle("GET /debt-repayments", protectedListDebtRepayment)
+
+	// --------------------
+	// Credits
+	// --------------------
+
+	protectedCreateCredit := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(creditHandler.Create),
+	)
+
+	protectedListCredit := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(creditHandler.List),
+	)
+
+	http.Handle("POST /credits", protectedCreateCredit)
+	http.Handle("GET /credits", protectedListCredit)
+
+	// --------------------
+	// Credit repayments
+	// --------------------
+
+	protectedCreateCreditRepayment := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(creditRepaymentHandler.Create),
+	)
+
+	protectedListCreditRepayment := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(creditRepaymentHandler.List),
+	)
+
+	http.Handle("POST /credit-repayments", protectedCreateCreditRepayment)
+	http.Handle("GET /credit-repayments", protectedListCreditRepayment)
+
+	// --------------------
+	// Dashboard
+	// --------------------
+
+	protectedDashboard := auth.Middleware(
+		jwtSecret,
+		http.HandlerFunc(dashboardHandler.Summary),
+	)
+
+	http.Handle("GET /dashboard", protectedDashboard)
 
 	// --------------------
 	// Default route
