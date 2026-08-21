@@ -1,0 +1,14 @@
+{
+  "name": "Income Tracker",
+  "forwardPorts": [5433, 5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Income Tracker Frontend",
+      "onAutoForward": "openBrowser"
+    },
+    "5433": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    }
+  }
+}
