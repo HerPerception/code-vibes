@@ -29,12 +29,15 @@ export function useWebSocketChat({ room, userName, avatarUrl }: UseWebSocketChat
         socketRef.current.close();
       }
 
-      setConnectionStatus('connecting');
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.host;
-      const wsUrl = `${protocol}//${host}/ws?room=${encodeURIComponent(room)}&user=${encodeURIComponent(
+           setConnectionStatus('connecting');
+      // Paste your copied port 8000 URL right here:
+      const BACKEND_URL = "wss://fantastic-fiesta-g4w464pw4x7q3wr9-8000.app.github.dev";
+      
+      // This matches your backend's exact /ws/{room_id} rule!
+      const wsUrl = `${BACKEND_URL}/ws/${encodeURIComponent(room)}?user=${encodeURIComponent(
         userName
       )}&avatar=${encodeURIComponent(avatarUrl)}`;
+
 
       try {
         const ws = new WebSocket(wsUrl);

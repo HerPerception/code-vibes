@@ -1,5 +1,4 @@
 package categories
-package categories
 
 import (
 	"context"
