@@ -34,6 +34,13 @@ type Expense = {
   description: string | null;
 };
 
+type Category = {
+  id: number;
+  finance_space_id: number;
+  name: string;
+  type: "income" | "expense";
+};
+
 function App() {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
@@ -42,7 +49,12 @@ function App() {
       return null;
     }
 
-    return JSON.parse(savedUser);
+    try {
+      return JSON.parse(savedUser);
+    } catch {
+      localStorage.removeItem("user");
+      return null;
+    }
   });
 
   const [token, setToken] = useState<string | null>(() => {
@@ -53,10 +65,13 @@ function App() {
   const [password, setPassword] = useState("");
 
   const [financeSpaces, setFinanceSpaces] = useState<FinanceSpace[]>([]);
-  const [selectedSpaceId, setSelectedSpaceId] = useState<number | null>(null);
+  const [selectedSpaceId, setSelectedSpaceId] = useState<number | null>(
+    null
+  );
 
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -89,6 +104,24 @@ function App() {
       (item) => item.finance_space_id === selectedSpaceId
     );
   }, [expenses, selectedSpaceId]);
+
+  const selectedCategories = useMemo(() => {
+    return categories.filter(
+      (category) => category.finance_space_id === selectedSpaceId
+    );
+  }, [categories, selectedSpaceId]);
+
+  const incomeCategories = useMemo(() => {
+    return selectedCategories.filter(
+      (category) => category.type === "income"
+    );
+  }, [selectedCategories]);
+
+  const expenseCategories = useMemo(() => {
+    return selectedCategories.filter(
+      (category) => category.type === "expense"
+    );
+  }, [selectedCategories]);
 
   const totalIncome = useMemo(() => {
     return selectedIncome.reduce(
@@ -153,10 +186,16 @@ function App() {
 
     setToken(null);
     setUser(null);
+
     setFinanceSpaces([]);
     setIncome([]);
     setExpenses([]);
+    setCategories([]);
+
     setSelectedSpaceId(null);
+
+    setShowIncomeForm(false);
+    setShowExpenseForm(false);
   }
 
   async function loadDashboard() {
@@ -172,20 +211,28 @@ function App() {
         Authorization: `Bearer ${token}`,
       };
 
-      const [spacesResponse, incomeResponse, expensesResponse] =
-        await Promise.all([
-          fetch(`${API_URL}/finance-spaces`, {
-            headers,
-          }),
+      const [
+        spacesResponse,
+        incomeResponse,
+        expensesResponse,
+        categoriesResponse,
+      ] = await Promise.all([
+        fetch(`${API_URL}/finance-spaces`, {
+          headers,
+        }),
 
-          fetch(`${API_URL}/income`, {
-            headers,
-          }),
+        fetch(`${API_URL}/income`, {
+          headers,
+        }),
 
-          fetch(`${API_URL}/expenses`, {
-            headers,
-          }),
-        ]);
+        fetch(`${API_URL}/expenses`, {
+          headers,
+        }),
+
+        fetch(`${API_URL}/categories`, {
+          headers,
+        }),
+      ]);
 
       if (!spacesResponse.ok) {
         throw new Error("Could not load finance spaces.");
@@ -199,27 +246,50 @@ function App() {
         throw new Error("Could not load expenses.");
       }
 
+      if (!categoriesResponse.ok) {
+        throw new Error("Could not load categories.");
+      }
+
       const spacesData = await spacesResponse.json();
       const incomeData = await incomeResponse.json();
       const expensesData = await expensesResponse.json();
+      const categoriesData = await categoriesResponse.json();
 
-      setFinanceSpaces(spacesData);
-      setIncome(Array.isArray(incomeData) ? incomeData : []);
-      setExpenses(Array.isArray(expensesData) ? expensesData : []);
+      const validSpaces: FinanceSpace[] = Array.isArray(spacesData)
+        ? spacesData
+        : [];
 
-      if (spacesData.length > 0) {
+      const validIncome: Income[] = Array.isArray(incomeData)
+        ? incomeData
+        : [];
+
+      const validExpenses: Expense[] = Array.isArray(expensesData)
+        ? expensesData
+        : [];
+
+      const validCategories: Category[] = Array.isArray(categoriesData)
+        ? categoriesData
+        : [];
+
+      setFinanceSpaces(validSpaces);
+      setIncome(validIncome);
+      setExpenses(validExpenses);
+      setCategories(validCategories);
+
+      if (validSpaces.length > 0) {
         setSelectedSpaceId((currentId) => {
-          if (
-            currentId &&
-            spacesData.some(
-              (space: FinanceSpace) => space.id === currentId
-            )
-          ) {
+          const currentSpaceStillExists = validSpaces.some(
+            (space) => space.id === currentId
+          );
+
+          if (currentId && currentSpaceStillExists) {
             return currentId;
           }
 
-          return spacesData[0].id;
+          return validSpaces[0].id;
         });
+      } else {
+        setSelectedSpaceId(null);
       }
     } catch (err) {
       setError(
@@ -239,6 +309,11 @@ function App() {
 
     if (!token || !selectedSpaceId) {
       setError("Please select a finance space.");
+      return;
+    }
+
+    if (!incomeCategoryId) {
+      setError("Please select an income category.");
       return;
     }
 
@@ -269,6 +344,7 @@ function App() {
       setIncomeCategoryId("");
       setIncomeDate("");
       setIncomeDescription("");
+
       setShowIncomeForm(false);
 
       await loadDashboard();
@@ -276,6 +352,7 @@ function App() {
       setError(
         err instanceof Error ? err.message : "Could not add income."
       );
+
       setLoading(false);
     }
   }
@@ -287,6 +364,11 @@ function App() {
 
     if (!token || !selectedSpaceId) {
       setError("Please select a finance space.");
+      return;
+    }
+
+    if (!expenseCategoryId) {
+      setError("Please select an expense category.");
       return;
     }
 
@@ -317,6 +399,7 @@ function App() {
       setExpenseCategoryId("");
       setExpenseDate("");
       setExpenseDescription("");
+
       setShowExpenseForm(false);
 
       await loadDashboard();
@@ -324,6 +407,7 @@ function App() {
       setError(
         err instanceof Error ? err.message : "Could not add expense."
       );
+
       setLoading(false);
     }
   }
@@ -455,6 +539,7 @@ function App() {
         <section className="summary-grid">
           <div className="summary-card">
             <span>Total Income</span>
+
             <strong className="income-value">
               {formatMoney(totalIncome)}
             </strong>
@@ -462,6 +547,7 @@ function App() {
 
           <div className="summary-card">
             <span>Total Expenses</span>
+
             <strong className="expense-value">
               {formatMoney(totalExpenses)}
             </strong>
@@ -469,11 +555,10 @@ function App() {
 
           <div className="summary-card">
             <span>Balance</span>
+
             <strong>{formatMoney(balance)}</strong>
           </div>
         </section>
-
-        {/* ACTION BUTTONS */}
 
         <section className="action-section">
           <button
@@ -481,6 +566,7 @@ function App() {
             onClick={() => {
               setShowIncomeForm(true);
               setShowExpenseForm(false);
+              setError("");
             }}
           >
             + Add Income
@@ -491,13 +577,12 @@ function App() {
             onClick={() => {
               setShowExpenseForm(true);
               setShowIncomeForm(false);
+              setError("");
             }}
           >
             + Add Expense
           </button>
         </section>
-
-        {/* ADD INCOME FORM */}
 
         {showIncomeForm && (
           <section className="form-card">
@@ -522,20 +607,37 @@ function App() {
               />
 
               <label htmlFor="income-category">
-                Category ID
+                Category
               </label>
 
-              <input
+              <select
                 id="income-category"
-                type="number"
-                min="1"
                 value={incomeCategoryId}
                 onChange={(event) =>
                   setIncomeCategoryId(event.target.value)
                 }
-                placeholder="e.g. 4"
                 required
-              />
+              >
+                <option value="">
+                  Select a category
+                </option>
+
+                {incomeCategories.map((category) => (
+                  <option
+                    key={category.id}
+                    value={category.id}
+                  >
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+
+              {incomeCategories.length === 0 && (
+                <p className="empty">
+                  No income categories available for this finance
+                  space.
+                </p>
+              )}
 
               <label htmlFor="income-date">
                 Date
@@ -581,8 +683,6 @@ function App() {
           </section>
         )}
 
-        {/* ADD EXPENSE FORM */}
-
         {showExpenseForm && (
           <section className="form-card">
             <h3>Add Expense</h3>
@@ -606,20 +706,37 @@ function App() {
               />
 
               <label htmlFor="expense-category">
-                Category ID
+                Category
               </label>
 
-              <input
+              <select
                 id="expense-category"
-                type="number"
-                min="1"
                 value={expenseCategoryId}
                 onChange={(event) =>
                   setExpenseCategoryId(event.target.value)
                 }
-                placeholder="e.g. 6"
                 required
-              />
+              >
+                <option value="">
+                  Select a category
+                </option>
+
+                {expenseCategories.map((category) => (
+                  <option
+                    key={category.id}
+                    value={category.id}
+                  >
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+
+              {expenseCategories.length === 0 && (
+                <p className="empty">
+                  No expense categories available for this finance
+                  space.
+                </p>
+              )}
 
               <label htmlFor="expense-date">
                 Date
@@ -665,17 +782,18 @@ function App() {
           </section>
         )}
 
-        {/* TRANSACTIONS */}
-
         <section className="transactions-grid">
           <div className="transaction-card">
             <div className="card-header">
               <h3>Recent Income</h3>
+
               <span>{selectedIncome.length}</span>
             </div>
 
             {selectedIncome.length === 0 ? (
-              <p className="empty">No income recorded.</p>
+              <p className="empty">
+                No income recorded.
+              </p>
             ) : (
               <div className="transaction-list">
                 {selectedIncome.map((item) => (
@@ -705,6 +823,7 @@ function App() {
           <div className="transaction-card">
             <div className="card-header">
               <h3>Recent Expenses</h3>
+
               <span>{selectedExpenses.length}</span>
             </div>
 

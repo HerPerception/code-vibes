@@ -2,15 +2,31 @@
   box-sizing: border-box;
 }
 
+:root {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color: #1f2937;
+  background: #f4f7fb;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #111318;
-  color: #f1f1f1;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f4f7fb;
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -18,72 +34,111 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* =========================
+   GENERAL APP
+========================= */
+
 .app {
   min-height: 100vh;
 }
 
+/* =========================
+   LOGIN
+========================= */
+
 .login-container {
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 60px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
 }
 
-.login-container h1 {
-  text-align: center;
-  font-size: 48px;
-  margin-bottom: 40px;
+.login-container > h1 {
+  margin: 0 0 24px;
+  font-size: 32px;
+  color: #111827;
 }
 
 .login-card {
-  background: #1b1e25;
-  border: 1px solid #30343d;
-  border-radius: 12px;
-  padding: 30px;
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e5e7eb;
 }
 
 .login-card h2 {
-  text-align: center;
-  margin-top: 0;
+  margin: 0 0 24px;
+  color: #111827;
 }
 
 .login-card form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 }
 
-.login-card label {
-  margin-top: 10px;
-  color: #bfc4cf;
+.login-card label,
+.form-card label {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
 }
 
-.login-card input {
-  padding: 12px;
-  border: 1px solid #454b57;
-  border-radius: 6px;
-  background: #111318;
-  color: white;
+.login-card input,
+.form-card input,
+.form-card select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  color: #111827;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
-.login-card button {
-  margin-top: 20px;
-  padding: 12px;
+.login-card input:focus,
+.form-card input:focus,
+.form-card select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.login-card button[type="submit"] {
   border: none;
-  border-radius: 6px;
-  background: #4f8cff;
+  border-radius: 8px;
+  padding: 13px 16px;
+  background: #2563eb;
   color: white;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
-.login-card button:hover {
-  background: #3d79e8;
+.login-card button[type="submit"]:hover {
+  background: #1d4ed8;
 }
+
+/* =========================
+   TOP BAR
+========================= */
 
 .topbar {
-  min-height: 80px;
-  padding: 20px 40px;
-  border-bottom: 1px solid #30343d;
-  background: #181b21;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 18px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -91,153 +146,320 @@ button {
 
 .topbar h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 24px;
+  color: #111827;
 }
 
 .topbar p {
-  margin: 5px 0 0;
-  color: #aeb4c0;
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .logout-button {
-  padding: 10px 18px;
-  border: none;
-  border-radius: 6px;
-  background: #3a3e47;
-  color: white;
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-weight: 600;
 }
 
+.logout-button:hover {
+  background: #f3f4f6;
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+
 .dashboard {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 30px;
+  padding: 32px;
 }
 
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 28px;
 }
 
 .dashboard-header h2 {
   margin: 0;
-  font-size: 32px;
+  font-size: 28px;
+  color: #111827;
 }
 
 .dashboard-header p {
-  color: #aeb4c0;
+  margin: 6px 0 0;
+  color: #6b7280;
 }
 
-.dashboard-header button {
-  padding: 10px 18px;
+.dashboard-header > button {
   border: none;
-  border-radius: 6px;
-  background: #4f8cff;
+  background: #2563eb;
   color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 600;
 }
+
+.dashboard-header > button:hover {
+  background: #1d4ed8;
+}
+
+/* =========================
+   ERROR
+========================= */
+
+.error {
+  margin: 16px 0 0;
+  color: #dc2626;
+  font-size: 14px;
+}
+
+.error-box {
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+}
+
+/* =========================
+   FINANCE SPACES
+========================= */
 
 .space-section {
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .space-section h3 {
-  margin-bottom: 15px;
+  margin: 0 0 14px;
+  color: #111827;
 }
 
 .space-list {
   display: flex;
-  gap: 15px;
   flex-wrap: wrap;
+  gap: 12px;
 }
 
 .space-card {
-  min-width: 180px;
-  padding: 18px;
-  border: 1px solid #363b45;
+  min-width: 150px;
+  padding: 16px;
+  border: 1px solid #d1d5db;
   border-radius: 10px;
-  background: #1b1e25;
-  color: white;
+  background: white;
+  color: #374151;
   text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
-.space-card strong {
-  display: block;
-  font-size: 18px;
-  margin-bottom: 5px;
-}
-
-.space-card span {
-  color: #9da4b1;
-  text-transform: capitalize;
+.space-card:hover {
+  border-color: #93c5fd;
+  transform: translateY(-1px);
 }
 
 .space-card.active {
-  border-color: #4f8cff;
-  background: #202a3d;
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
+
+.space-card strong {
+  color: #111827;
+}
+
+.space-card span {
+  color: #6b7280;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+/* =========================
+   SUMMARY
+========================= */
 
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .summary-card {
-  background: #1b1e25;
-  border: 1px solid #30343d;
-  border-radius: 10px;
-  padding: 25px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
 }
 
 .summary-card span {
-  display: block;
-  color: #aeb4c0;
-  margin-bottom: 10px;
+  color: #6b7280;
+  font-size: 14px;
 }
 
 .summary-card strong {
-  font-size: 28px;
+  font-size: 24px;
+  color: #111827;
 }
 
 .income-value {
-  color: #56d364;
+  color: #16a34a !important;
 }
 
 .expense-value {
-  color: #ff6b6b;
+  color: #dc2626 !important;
 }
+
+/* =========================
+   ACTION BUTTONS
+========================= */
+
+.action-section {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.action-section button {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.income-button {
+  background: #16a34a;
+  color: white;
+}
+
+.income-button:hover {
+  background: #15803d;
+}
+
+.expense-button {
+  background: #dc2626;
+  color: white;
+}
+
+.expense-button:hover {
+  background: #b91c1c;
+}
+
+/* =========================
+   FORMS
+========================= */
+
+.form-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+.form-card h3 {
+  margin: 0 0 22px;
+  color: #111827;
+}
+
+.form-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.form-actions button {
+  padding: 11px 18px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+}
+
+.form-actions button[type="submit"] {
+  background: #2563eb;
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background: #1d4ed8;
+}
+
+.form-actions button[type="button"] {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.form-actions button[type="button"]:hover {
+  background: #e5e7eb;
+}
+
+/* =========================
+   TRANSACTIONS
+========================= */
 
 .transactions-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
 
 .transaction-card {
-  background: #1b1e25;
-  border: 1px solid #30343d;
-  border-radius: 10px;
-  padding: 25px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
 }
 
 .card-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
 }
 
 .card-header h3 {
   margin: 0;
+  color: #111827;
+  font-size: 17px;
 }
 
 .card-header span {
-  background: #30343d;
-  padding: 4px 10px;
-  border-radius: 20px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 13px;
+  font-weight: 600;
 }
 
 .transaction-list {
@@ -246,67 +468,126 @@ button {
 }
 
 .transaction {
+  padding: 17px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid #30343d;
-  gap: 15px;
+  gap: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .transaction:last-child {
   border-bottom: none;
 }
 
+.transaction > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
 .transaction strong {
-  display: block;
+  color: #111827;
+  font-size: 14px;
 }
 
 .transaction small {
-  display: block;
-  color: #8e95a3;
-  margin-top: 5px;
+  color: #6b7280;
+  font-size: 12px;
 }
 
 .transaction > span {
+  font-weight: 700;
   white-space: nowrap;
 }
 
 .empty {
-  color: #8e95a3;
+  padding: 24px 20px;
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
 }
 
-.error {
-  color: #ff6b6b;
-  text-align: center;
-  margin-top: 15px;
-}
-
-.error-box {
-  padding: 15px;
-  margin-bottom: 20px;
-  border: 1px solid #7d3333;
-  border-radius: 8px;
-  background: #2a1717;
-  color: #ff8a8a;
-}
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media (max-width: 800px) {
-  .summary-grid,
-  .transactions-grid {
-    grid-template-columns: 1fr;
+  .dashboard {
+    padding: 24px 18px;
   }
 
   .topbar {
-    padding: 20px;
+    padding: 16px 18px;
   }
 
-  .dashboard {
-    padding: 20px;
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transactions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-card {
+    padding: 24px;
+  }
+
+  .topbar {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .topbar h1 {
+    font-size: 20px;
   }
 
   .dashboard-header {
+    flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 16px;
+  }
+
+  .dashboard-header > button {
+    width: 100%;
+  }
+
+  .space-list {
+    flex-direction: column;
+  }
+
+  .space-card {
+    width: 100%;
+  }
+
+  .action-section {
+    flex-direction: column;
+  }
+
+  .action-section button {
+    width: 100%;
+  }
+
+  .form-card {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+  .transaction {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .transaction > span {
+    align-self: flex-end;
   }
 }
