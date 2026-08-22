@@ -3,6 +3,7 @@ package finance
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -14,7 +15,11 @@ type FinanceSpace struct {
 	UserID int    `json:"user_id"`
 }
 
-var ErrInvalidType = errors.New("invalid finance space type")
+var (
+	ErrInvalidType   = errors.New("invalid finance space type")
+	ErrInvalidName   = errors.New("finance space name cannot be empty")
+	ErrDuplicateName = errors.New("finance space with this name already exists")
+)
 
 func Create(
 	ctx context.Context,
@@ -23,13 +28,40 @@ func Create(
 	name string,
 	spaceType string,
 ) (FinanceSpace, error) {
+	name = strings.TrimSpace(name)
+
+	if name == "" {
+		return FinanceSpace{}, ErrInvalidName
+	}
+
 	if spaceType != "personal" && spaceType != "business" {
 		return FinanceSpace{}, ErrInvalidType
 	}
 
-	var space FinanceSpace
+	var existingID int
 
 	err := conn.QueryRow(
+		ctx,
+		`SELECT id
+		 FROM finance_spaces
+		 WHERE user_id = $1
+		   AND LOWER(name) = LOWER($2)
+		 LIMIT 1`,
+		userID,
+		name,
+	).Scan(&existingID)
+
+	if err == nil {
+		return FinanceSpace{}, ErrDuplicateName
+	}
+
+	if !errors.Is(err, pgx.ErrNoRows) {
+		return FinanceSpace{}, err
+	}
+
+	var space FinanceSpace
+
+	err = conn.QueryRow(
 		ctx,
 		`INSERT INTO finance_spaces (user_id, name, type)
 		 VALUES ($1, $2, $3)

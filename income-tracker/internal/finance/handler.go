@@ -41,13 +41,38 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 		req.Name,
 		req.Type,
 	)
+
 	if err != nil {
-		if errors.Is(err, ErrInvalidType) {
-			http.Error(w, "type must be personal or business", http.StatusBadRequest)
-			return
+		switch {
+		case errors.Is(err, ErrInvalidName):
+			http.Error(
+				w,
+				"finance space name cannot be empty",
+				http.StatusBadRequest,
+			)
+
+		case errors.Is(err, ErrInvalidType):
+			http.Error(
+				w,
+				"type must be personal or business",
+				http.StatusBadRequest,
+			)
+
+		case errors.Is(err, ErrDuplicateName):
+			http.Error(
+				w,
+				"you already have a finance space with this name",
+				http.StatusConflict,
+			)
+
+		default:
+			http.Error(
+				w,
+				"could not create finance space",
+				http.StatusInternalServerError,
+			)
 		}
 
-		http.Error(w, "could not create finance space", http.StatusInternalServerError)
 		return
 	}
 
@@ -69,11 +94,17 @@ func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 		h.Conn,
 		userID,
 	)
+
 	if err != nil {
-		http.Error(w, "could not get finance spaces", http.StatusInternalServerError)
+		http.Error(
+			w,
+			"could not get finance spaces",
+			http.StatusInternalServerError,
+		)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+
 	json.NewEncoder(w).Encode(spaces)
 }
