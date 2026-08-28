@@ -3,8 +3,10 @@ package users
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"income-tracker/internal/auth"
 
@@ -34,9 +36,16 @@ type LoginResponse struct {
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var req CreateRequest
 
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	req.Name = strings.TrimSpace(req.Name)
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+
+	if req.Name == "" || req.Email == "" || req.Password == "" {
+		http.Error(w, "name, email, and password are required", http.StatusBadRequest)
 		return
 	}
 
@@ -53,37 +62,34 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		log.Printf("create user failed: %v", err)
 		http.Error(w, "could not create user", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-
-	json.NewEncoder(w).Encode(user)
+	_ = json.NewEncoder(w).Encode(user)
 }
 
 func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	user, err := Login(
-		r.Context(),
-		h.Conn,
-		req.Email,
-		req.Password,
-	)
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+
+	user, err := Login(r.Context(), h.Conn, req.Email, req.Password)
 	if err != nil {
 		if errors.Is(err, ErrInvalidCredentials) {
 			http.Error(w, "invalid email or password", http.StatusUnauthorized)
 			return
 		}
 
+		log.Printf("login failed: %v", err)
 		http.Error(w, "could not log in", http.StatusInternalServerError)
 		return
 	}
@@ -96,15 +102,14 @@ func (h Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	token, err := auth.GenerateToken(user.ID, secret)
 	if err != nil {
+		log.Printf("token creation failed: %v", err)
 		http.Error(w, "could not create token", http.StatusInternalServerError)
 		return
 	}
 
-	response := LoginResponse{
+	w.Header().Set("Content-Type", "application/json")
+	_ = json.NewEncoder(w).Encode(LoginResponse{
 		User:  user,
 		Token: token,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	})
 }
