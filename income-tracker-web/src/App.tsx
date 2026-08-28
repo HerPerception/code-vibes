@@ -88,6 +88,8 @@ type ModalType =
   | "debt-repayment"
   | "credit"
   | "credit-repayment"
+  | "income"
+  | "expense"
   | null;
 
 function App() {
@@ -132,6 +134,11 @@ function App() {
   const [error, setError] = useState("");
 
   const [modal, setModal] = useState<ModalType>(null);
+
+  const [entryCategoryId, setEntryCategoryId] = useState("");
+  const [entryAmount, setEntryAmount] = useState("");
+  const [entryDate, setEntryDate] = useState("");
+  const [entryDescription, setEntryDescription] = useState("");
 
   const [spaceName, setSpaceName] = useState("");
   const [spaceType, setSpaceType] = useState<"personal" | "business">(
@@ -504,6 +511,11 @@ function App() {
     setCreditRepaymentCreditId("");
     setCreditRepaymentAmount("");
     setCreditRepaymentDateValue("");
+
+    setEntryCategoryId("");
+    setEntryAmount("");
+    setEntryDate("");
+    setEntryDescription("");
   }
 
   async function postJSON(
@@ -702,6 +714,58 @@ function App() {
           ? err.message
           : "Could not create credit repayment."
       );
+    }
+  }
+
+  async function createIncome(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedSpaceId) {
+      setError("Select a finance space first.");
+      return;
+    }
+
+    try {
+      setError("");
+
+      const item = await postJSON("/income", {
+        finance_space_id: selectedSpaceId,
+        category_id: Number(entryCategoryId),
+        amount: Number(entryAmount),
+        date_received: entryDate,
+        description: entryDescription.trim(),
+      });
+
+      setIncome((current) => [...current, item]);
+      closeModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not create income.");
+    }
+  }
+
+  async function createExpense(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!selectedSpaceId) {
+      setError("Select a finance space first.");
+      return;
+    }
+
+    try {
+      setError("");
+
+      const item = await postJSON("/expenses", {
+        finance_space_id: selectedSpaceId,
+        category_id: Number(entryCategoryId),
+        amount: Number(entryAmount),
+        date: entryDate,
+        description: entryDescription.trim(),
+      });
+
+      setExpenses((current) => [...current, item]);
+      closeModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not create expense.");
     }
   }
 
@@ -949,6 +1013,14 @@ function App() {
             </section>
 
             <section className="action-grid">
+              <button onClick={() => setModal("income")}>
+                + Add Income
+              </button>
+
+              <button onClick={() => setModal("expense")}>
+                + Add Expense
+              </button>
+
               <button onClick={() => setModal("person")}>
                 + Add Person
               </button>
@@ -1239,10 +1311,73 @@ function App() {
                 {modal === "credit" && "Add Credit"}
                 {modal === "credit-repayment" &&
                   "Record Credit Repayment"}
+                {modal === "income" && "Add Income"}
+                {modal === "expense" && "Add Expense"}
               </h2>
 
               <button onClick={closeModal}>×</button>
             </div>
+
+            {(modal === "income" || modal === "expense") && (
+              <form
+                onSubmit={
+                  modal === "income" ? createIncome : createExpense
+                }
+              >
+                <label htmlFor="entry-category">Category ID</label>
+
+                <input
+                  id="entry-category"
+                  type="number"
+                  min="1"
+                  value={entryCategoryId}
+                  onChange={(event) =>
+                    setEntryCategoryId(event.target.value)
+                  }
+                  required
+                />
+
+                <label htmlFor="entry-amount">Amount</label>
+
+                <input
+                  id="entry-amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={entryAmount}
+                  onChange={(event) =>
+                    setEntryAmount(event.target.value)
+                  }
+                  required
+                />
+
+                <label htmlFor="entry-date">Date</label>
+
+                <input
+                  id="entry-date"
+                  type="date"
+                  value={entryDate}
+                  onChange={(event) =>
+                    setEntryDate(event.target.value)
+                  }
+                  required
+                />
+
+                <label htmlFor="entry-description">Description</label>
+
+                <textarea
+                  id="entry-description"
+                  value={entryDescription}
+                  onChange={(event) =>
+                    setEntryDescription(event.target.value)
+                  }
+                />
+
+                <button type="submit">
+                  {modal === "income" ? "Add Income" : "Add Expense"}
+                </button>
+              </form>
+            )}
 
             {modal === "finance" && (
               <form onSubmit={createFinanceSpace}>
