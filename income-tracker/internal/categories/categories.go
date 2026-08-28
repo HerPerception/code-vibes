@@ -3,8 +3,7 @@ package categories
 import (
 	"context"
 	"errors"
-
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Category struct {
@@ -18,7 +17,7 @@ var ErrFinanceSpaceNotFound = errors.New("finance space not found")
 
 func Create(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 	financeSpaceID int,
 	name string,
@@ -76,7 +75,7 @@ func Create(
 
 func List(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) ([]Category, error) {
 

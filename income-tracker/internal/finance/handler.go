@@ -3,15 +3,14 @@ package finance
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"net/http"
 
 	"income-tracker/internal/auth"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Handler struct {
-	Conn *pgx.Conn
+	Conn *pgxpool.Pool
 }
 
 type CreateRequest struct {

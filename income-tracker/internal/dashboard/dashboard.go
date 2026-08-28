@@ -2,8 +2,7 @@ package dashboard
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Summary struct {
@@ -16,7 +15,7 @@ type Summary struct {
 
 func GetSummary(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) (Summary, error) {
 

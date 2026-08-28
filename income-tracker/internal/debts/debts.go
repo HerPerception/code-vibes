@@ -3,9 +3,8 @@ package debts
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Debt struct {
@@ -29,7 +28,7 @@ var (
 
 func Create(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 	financeSpaceID int,
 	personID *int,
@@ -142,7 +141,7 @@ func Create(
 
 func List(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) ([]Debt, error) {
 

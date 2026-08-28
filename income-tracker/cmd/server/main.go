@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close(context.Background())
+	defer conn.Close()
 
 	if err := conn.Ping(context.Background()); err != nil {
 		log.Fatal(err)

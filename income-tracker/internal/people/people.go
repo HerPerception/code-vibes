@@ -3,9 +3,8 @@ package people
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Person struct {
@@ -23,7 +22,7 @@ var (
 
 func Create(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 	financeSpaceID int,
 	name string,
@@ -92,7 +91,7 @@ func Create(
 
 func List(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) ([]Person, error) {
 

@@ -3,9 +3,8 @@ package finance
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type FinanceSpace struct {
@@ -23,7 +22,7 @@ var (
 
 func Create(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 	name string,
 	spaceType string,
@@ -87,7 +86,7 @@ func Create(
 
 func List(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) ([]FinanceSpace, error) {
 

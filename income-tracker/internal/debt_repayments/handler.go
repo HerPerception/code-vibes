@@ -3,16 +3,15 @@ package debt_repayments
 import (
 	"encoding/json"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"net/http"
 	"time"
 
 	"income-tracker/internal/auth"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Handler struct {
-	Conn *pgx.Conn
+	Conn *pgxpool.Pool
 }
 
 type CreateRequest struct {

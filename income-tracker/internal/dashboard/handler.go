@@ -2,15 +2,14 @@ package dashboard
 
 import (
 	"encoding/json"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"net/http"
 
 	"income-tracker/internal/auth"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Handler struct {
-	Conn *pgx.Conn
+	Conn *pgxpool.Pool
 }
 
 func (h Handler) Summary(w http.ResponseWriter, r *http.Request) {

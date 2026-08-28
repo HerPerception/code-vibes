@@ -6,9 +6,10 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Connect() (*pgx.Conn, error) {
+func Connect() (*pgxpool.Pool, error) {
 	connString := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s",
 		os.Getenv("DB_USER"),
@@ -18,5 +19,12 @@ func Connect() (*pgx.Conn, error) {
 		os.Getenv("DB_NAME"),
 	)
 
-	return pgx.Connect(context.Background(), connString)
+	config, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		return nil, err
+	}
+
+	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeExec
+
+	return pgxpool.NewWithConfig(context.Background(), config)
 }

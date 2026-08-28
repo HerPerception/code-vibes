@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -18,7 +19,7 @@ type User struct {
 var ErrEmailExists = errors.New("email already exists")
 var ErrInvalidCredentials = errors.New("invalid email or password")
 
-func Create(ctx context.Context, conn *pgx.Conn, name, email, password string) (User, error) {
+func Create(ctx context.Context, conn *pgxpool.Pool, name, email, password string) (User, error) {
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return User{}, err
@@ -55,7 +56,7 @@ func Create(ctx context.Context, conn *pgx.Conn, name, email, password string) (
 	return user, nil
 }
 
-func Login(ctx context.Context, conn *pgx.Conn, email, password string) (User, error) {
+func Login(ctx context.Context, conn *pgxpool.Pool, email, password string) (User, error) {
 	var user User
 	var passwordHash string
 

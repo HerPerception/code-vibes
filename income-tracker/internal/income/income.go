@@ -3,9 +3,8 @@ package income
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
-
-	"github.com/jackc/pgx/v5"
 )
 
 type Income struct {
@@ -21,7 +20,7 @@ var ErrFinanceSpaceNotFound = errors.New("finance space not found")
 
 func Create(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 	financeSpaceID int,
 	categoryID int,
@@ -93,7 +92,7 @@ func Create(
 
 func List(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) ([]Income, error) {
 

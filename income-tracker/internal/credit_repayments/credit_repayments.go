@@ -3,6 +3,7 @@ package credit_repayments
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -23,7 +24,7 @@ var (
 
 func Create(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 	creditID int,
 	amount float64,
@@ -105,7 +106,7 @@ func Create(
 
 func List(
 	ctx context.Context,
-	conn *pgx.Conn,
+	conn *pgxpool.Pool,
 	userID int,
 ) ([]CreditRepayment, error) {
 
