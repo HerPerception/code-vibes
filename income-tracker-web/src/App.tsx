@@ -21,6 +21,13 @@ type FinanceSpace = {
   user_id: number;
 };
 
+type Category = {
+  id: number;
+  finance_space_id: number;
+  name: string;
+  type: "income" | "expense";
+};
+
 type Income = {
   id: number;
   finance_space_id: number;
@@ -120,6 +127,7 @@ function App() {
   const [financeSpaces, setFinanceSpaces] = useState<FinanceSpace[]>([]);
   const [selectedSpaceId, setSelectedSpaceId] = useState<number | null>(null);
 
+  const [categories, setCategories] = useState<Category[]>([]);
   const [income, setIncome] = useState<Income[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [people, setPeople] = useState<Person[]>([]);
@@ -173,6 +181,14 @@ function App() {
 
   const selectedSpace = financeSpaces.find(
     (space) => space.id === selectedSpaceId
+  );
+
+  const selectedCategories = useMemo(
+    () =>
+      categories.filter(
+        (category) => category.finance_space_id === selectedSpaceId
+      ),
+    [categories, selectedSpaceId]
   );
 
   const selectedIncome = useMemo(
@@ -353,6 +369,7 @@ function App() {
     setUser(null);
 
     setFinanceSpaces([]);
+    setCategories([]);
     setIncome([]);
     setExpenses([]);
     setPeople([]);
@@ -379,6 +396,7 @@ function App() {
 
       const responses = await Promise.all([
         fetch(`${API_URL}/finance-spaces`, { headers }),
+        fetch(`${API_URL}/categories`, { headers }),
         fetch(`${API_URL}/income`, { headers }),
         fetch(`${API_URL}/expenses`, { headers }),
         fetch(`${API_URL}/people`, { headers }),
@@ -390,6 +408,7 @@ function App() {
 
       const names = [
         "finance spaces",
+        "categories",
         "income",
         "expenses",
         "people",
@@ -407,6 +426,7 @@ function App() {
 
       const [
         spacesData,
+        categoriesData,
         incomeData,
         expensesData,
         peopleData,
@@ -419,6 +439,9 @@ function App() {
       const spaces = Array.isArray(spacesData) ? spacesData : [];
 
       setFinanceSpaces(spaces);
+      setCategories(
+        Array.isArray(categoriesData) ? categoriesData : []
+      );
       setIncome(Array.isArray(incomeData) ? incomeData : []);
       setExpenses(Array.isArray(expensesData) ? expensesData : []);
       setPeople(Array.isArray(peopleData) ? peopleData : []);
@@ -725,6 +748,21 @@ function App() {
       return;
     }
 
+    if (!entryCategoryId) {
+      setError("Select a category.");
+      return;
+    }
+
+    if (!entryAmount || Number(entryAmount) <= 0) {
+      setError("Enter an amount greater than zero.");
+      return;
+    }
+
+    if (!entryDate) {
+      setError("Select a date.");
+      return;
+    }
+
     try {
       setError("");
 
@@ -748,6 +786,21 @@ function App() {
 
     if (!selectedSpaceId) {
       setError("Select a finance space first.");
+      return;
+    }
+
+    if (!entryCategoryId) {
+      setError("Select a category.");
+      return;
+    }
+
+    if (!entryAmount || Number(entryAmount) <= 0) {
+      setError("Enter an amount greater than zero.");
+      return;
+    }
+
+    if (!entryDate) {
+      setError("Select a date.");
       return;
     }
 
@@ -1324,18 +1377,30 @@ function App() {
                   modal === "income" ? createIncome : createExpense
                 }
               >
-                <label htmlFor="entry-category">Category ID</label>
+                <label htmlFor="entry-category">Category</label>
 
-                <input
+                <select
                   id="entry-category"
-                  type="number"
-                  min="1"
                   value={entryCategoryId}
                   onChange={(event) =>
                     setEntryCategoryId(event.target.value)
                   }
                   required
-                />
+                >
+                  <option value="">Select a category</option>
+
+                  {selectedCategories
+                    .filter((category) =>
+                      modal === "income"
+                        ? category.type === "income"
+                        : category.type === "expense"
+                    )
+                    .map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                </select>
 
                 <label htmlFor="entry-amount">Amount</label>
 
