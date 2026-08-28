@@ -6,6 +6,16 @@ const API_URL = (
   import.meta.env.VITE_API_URL || "http://localhost:8080"
 ).replace(/\/$/, "");
 
+const DEFAULT_CATEGORIES = [
+  { name: "Salary", type: "income" as const },
+  { name: "Business Income", type: "income" as const },
+  { name: "Other Income", type: "income" as const },
+  { name: "Food", type: "expense" as const },
+  { name: "Transport", type: "expense" as const },
+  { name: "Bills", type: "expense" as const },
+  { name: "Other Expense", type: "expense" as const },
+];
+
 
 // ...existing code...
 type User = {
@@ -438,10 +448,17 @@ function App() {
 
       const spaces = Array.isArray(spacesData) ? spacesData : [];
 
-      setFinanceSpaces(spaces);
-      setCategories(
-        Array.isArray(categoriesData) ? categoriesData : []
+      const loadedCategories: Category[] = Array.isArray(categoriesData)
+        ? categoriesData
+        : [];
+
+      const completeCategories = await ensureDefaultCategories(
+        spaces,
+        loadedCategories
       );
+
+      setFinanceSpaces(spaces);
+      setCategories(completeCategories);
       setIncome(Array.isArray(incomeData) ? incomeData : []);
       setExpenses(Array.isArray(expensesData) ? expensesData : []);
       setPeople(Array.isArray(peopleData) ? peopleData : []);
@@ -566,6 +583,39 @@ function App() {
     return response.json();
   }
 
+  async function ensureDefaultCategories(
+    spaces: FinanceSpace[],
+    existingCategories: Category[]
+  ): Promise<Category[]> {
+    const completeCategories = [...existingCategories];
+
+    for (const space of spaces) {
+      for (const defaultCategory of DEFAULT_CATEGORIES) {
+        const exists = completeCategories.some(
+          (category) =>
+            category.finance_space_id === space.id &&
+            category.type === defaultCategory.type &&
+            category.name.toLowerCase() ===
+              defaultCategory.name.toLowerCase()
+        );
+
+        if (exists) {
+          continue;
+        }
+
+        const category = (await postJSON("/categories", {
+          finance_space_id: space.id,
+          name: defaultCategory.name,
+          type: defaultCategory.type,
+        })) as Category;
+
+        completeCategories.push(category);
+      }
+    }
+
+    return completeCategories;
+  }
+
   async function createFinanceSpace(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -577,12 +627,15 @@ function App() {
     try {
       setError("");
 
-      const space = await postJSON("/finance-spaces", {
+      const space = (await postJSON("/finance-spaces", {
         name: spaceName.trim(),
         type: spaceType,
-      });
+      })) as FinanceSpace;
+
+      const newCategories = await ensureDefaultCategories([space], []);
 
       setFinanceSpaces((current) => [...current, space]);
+      setCategories((current) => [...current, ...newCategories]);
       setSelectedSpaceId(space.id);
 
       closeModal();
