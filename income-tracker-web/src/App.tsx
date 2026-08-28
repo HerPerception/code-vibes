@@ -48,8 +48,6 @@ type Debt = {
   finance_space_id: number;
   person_id?: number | null;
   amount: number;
-  amount_repaid: number;
-  outstanding: number;
   date_borrowed: string;
   repayment_date?: string | null;
   description?: string | null;
@@ -99,7 +97,6 @@ function App() {
     try {
       return JSON.parse(savedUser);
     } catch {
-      localStorage.removeItem("user");
       return null;
     }
   });
@@ -194,32 +191,6 @@ function App() {
     [credits, selectedSpaceId]
   );
 
-  const selectedDebtIds = useMemo(
-    () => new Set(selectedDebts.map((debt) => debt.id)),
-    [selectedDebts]
-  );
-
-  const selectedCreditIds = useMemo(
-    () => new Set(selectedCredits.map((credit) => credit.id)),
-    [selectedCredits]
-  );
-
-  const selectedDebtRepayments = useMemo(
-    () =>
-      debtRepayments.filter((repayment) =>
-        selectedDebtIds.has(repayment.debt_id)
-      ),
-    [debtRepayments, selectedDebtIds]
-  );
-
-  const selectedCreditRepayments = useMemo(
-    () =>
-      creditRepayments.filter((repayment) =>
-        selectedCreditIds.has(repayment.credit_id)
-      ),
-    [creditRepayments, selectedCreditIds]
-  );
-
   const totalIncome = useMemo(
     () =>
       selectedIncome.reduce(
@@ -241,7 +212,7 @@ function App() {
   const totalDebt = useMemo(
     () =>
       selectedDebts.reduce(
-        (total, debt) => total + Number(debt.amount),
+        (total, item) => total + Number(item.amount),
         0
       ),
     [selectedDebts]
@@ -249,17 +220,17 @@ function App() {
 
   const totalDebtRepaid = useMemo(
     () =>
-      selectedDebts.reduce(
-        (total, debt) => total + Number(debt.amount_repaid || 0),
+      debtRepayments.reduce(
+        (total, repayment) => total + Number(repayment.amount),
         0
       ),
-    [selectedDebts]
+    [debtRepayments]
   );
 
   const totalCredit = useMemo(
     () =>
       selectedCredits.reduce(
-        (total, credit) => total + Number(credit.amount),
+        (total, item) => total + Number(item.amount),
         0
       ),
     [selectedCredits]
@@ -267,11 +238,11 @@ function App() {
 
   const totalCreditRepaid = useMemo(
     () =>
-      selectedCreditRepayments.reduce(
+      creditRepayments.reduce(
         (total, repayment) => total + Number(repayment.amount),
         0
       ),
-    [selectedCreditRepayments]
+    [creditRepayments]
   );
 
   const outstandingDebt = totalDebt - totalDebtRepaid;
@@ -350,35 +321,33 @@ function App() {
         Authorization: `Bearer ${token}`,
       };
 
-      const endpoints = [
-        "finance-spaces",
+      const responses = await Promise.all([
+        fetch(`${API_URL}/finance-spaces`, { headers }),
+        fetch(`${API_URL}/income`, { headers }),
+        fetch(`${API_URL}/expenses`, { headers }),
+        fetch(`${API_URL}/people`, { headers }),
+        fetch(`${API_URL}/debts`, { headers }),
+        fetch(`${API_URL}/debt-repayments`, { headers }),
+        fetch(`${API_URL}/credits`, { headers }),
+        fetch(`${API_URL}/credit-repayments`, { headers }),
+      ]);
+
+      const names = [
+        "finance spaces",
         "income",
         "expenses",
         "people",
         "debts",
-        "debt-repayments",
+        "debt repayments",
         "credits",
-        "credit-repayments",
+        "credit repayments",
       ];
 
-      const responses = await Promise.all(
-        endpoints.map((endpoint) =>
-          fetch(`${API_URL}/${endpoint}`, {
-            headers,
-          })
-        )
-      );
-
-      const data = await Promise.all(
-        responses.map(async (response) => {
-          if (!response.ok) {
-            const message = await response.text();
-            throw new Error(message.trim() || "Request failed.");
-          }
-
-          return response.json();
-        })
-      );
+      for (let i = 0; i < responses.length; i++) {
+        if (!responses[i].ok) {
+          throw new Error(`Could not load ${names[i]}.`);
+        }
+      }
 
       const [
         spacesData,
@@ -389,11 +358,9 @@ function App() {
         debtRepaymentsData,
         creditsData,
         creditRepaymentsData,
-      ] = data;
+      ] = await Promise.all(responses.map((response) => response.json()));
 
-      const spaces = Array.isArray(spacesData)
-        ? spacesData
-        : [];
+      const spaces = Array.isArray(spacesData) ? spacesData : [];
 
       setFinanceSpaces(spaces);
       setIncome(Array.isArray(incomeData) ? incomeData : []);
@@ -401,9 +368,7 @@ function App() {
       setPeople(Array.isArray(peopleData) ? peopleData : []);
       setDebts(Array.isArray(debtsData) ? debtsData : []);
       setDebtRepayments(
-        Array.isArray(debtRepaymentsData)
-          ? debtRepaymentsData
-          : []
+        Array.isArray(debtRepaymentsData) ? debtRepaymentsData : []
       );
       setCredits(Array.isArray(creditsData) ? creditsData : []);
       setCreditRepayments(
@@ -416,9 +381,7 @@ function App() {
         setSelectedSpaceId((currentId) => {
           if (
             currentId &&
-            spaces.some(
-              (space: FinanceSpace) => space.id === currentId
-            )
+            spaces.some((space: FinanceSpace) => space.id === currentId)
           ) {
             return currentId;
           }
@@ -430,9 +393,7 @@ function App() {
       }
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Could not load dashboard."
+        err instanceof Error ? err.message : "Could not load dashboard."
       );
     } finally {
       setLoading(false);
@@ -521,9 +482,7 @@ function App() {
     return response.json();
   }
 
-  async function createFinanceSpace(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function createFinanceSpace(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!spaceName.trim()) {
@@ -552,9 +511,7 @@ function App() {
     }
   }
 
-  async function createPerson(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function createPerson(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!selectedSpaceId) {
@@ -582,30 +539,16 @@ function App() {
       closeModal();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Could not create person."
+        err instanceof Error ? err.message : "Could not create person."
       );
     }
   }
 
-  async function createDebt(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function createDebt(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!selectedSpaceId) {
       setError("Select a finance space first.");
-      return;
-    }
-
-    if (!debtAmount || Number(debtAmount) <= 0) {
-      setError("Enter a valid debt amount.");
-      return;
-    }
-
-    if (!debtDate) {
-      setError("Select the date borrowed.");
       return;
     }
 
@@ -614,9 +557,7 @@ function App() {
 
       const debt = await postJSON("/debts", {
         finance_space_id: selectedSpaceId,
-        person_id: debtPersonId
-          ? Number(debtPersonId)
-          : null,
+        person_id: debtPersonId ? Number(debtPersonId) : null,
         amount: Number(debtAmount),
         date_borrowed: debtDate,
         repayment_date: debtRepaymentDate || null,
@@ -628,9 +569,7 @@ function App() {
       closeModal();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Could not create debt."
+        err instanceof Error ? err.message : "Could not create debt."
       );
     }
   }
@@ -639,24 +578,6 @@ function App() {
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-
-    if (!debtRepaymentDebtId) {
-      setError("Select a debt.");
-      return;
-    }
-
-    if (
-      !debtRepaymentAmount ||
-      Number(debtRepaymentAmount) <= 0
-    ) {
-      setError("Enter a valid repayment amount.");
-      return;
-    }
-
-    if (!debtRepaymentDateValue) {
-      setError("Select the repayment date.");
-      return;
-    }
 
     try {
       setError("");
@@ -667,14 +588,9 @@ function App() {
         date: debtRepaymentDateValue,
       });
 
-      setDebtRepayments((current) => [
-        ...current,
-        repayment,
-      ]);
+      setDebtRepayments((current) => [...current, repayment]);
 
       closeModal();
-
-      await loadDashboard();
     } catch (err) {
       setError(
         err instanceof Error
@@ -684,23 +600,11 @@ function App() {
     }
   }
 
-  async function createCredit(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function createCredit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!selectedSpaceId) {
       setError("Select a finance space first.");
-      return;
-    }
-
-    if (!creditAmount || Number(creditAmount) <= 0) {
-      setError("Enter a valid credit amount.");
-      return;
-    }
-
-    if (!creditDate) {
-      setError("Select the date lent.");
       return;
     }
 
@@ -709,9 +613,7 @@ function App() {
 
       const credit = await postJSON("/credits", {
         finance_space_id: selectedSpaceId,
-        person_id: creditPersonId
-          ? Number(creditPersonId)
-          : null,
+        person_id: creditPersonId ? Number(creditPersonId) : null,
         amount: Number(creditAmount),
         date_lent: creditDate,
         repayment_date: creditRepaymentDate || null,
@@ -723,9 +625,7 @@ function App() {
       closeModal();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Could not create credit."
+        err instanceof Error ? err.message : "Could not create credit."
       );
     }
   }
@@ -734,24 +634,6 @@ function App() {
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-
-    if (!creditRepaymentCreditId) {
-      setError("Select a credit.");
-      return;
-    }
-
-    if (
-      !creditRepaymentAmount ||
-      Number(creditRepaymentAmount) <= 0
-    ) {
-      setError("Enter a valid repayment amount.");
-      return;
-    }
-
-    if (!creditRepaymentDateValue) {
-      setError("Select the repayment date.");
-      return;
-    }
 
     try {
       setError("");
@@ -762,14 +644,9 @@ function App() {
         date: creditRepaymentDateValue,
       });
 
-      setCreditRepayments((current) => [
-        ...current,
-        repayment,
-      ]);
+      setCreditRepayments((current) => [...current, repayment]);
 
       closeModal();
-
-      await loadDashboard();
     } catch (err) {
       setError(
         err instanceof Error
@@ -779,9 +656,7 @@ function App() {
     }
   }
 
-  function getPersonName(
-    personId: number | null | undefined
-  ) {
+  function getPersonName(personId: number | null | undefined) {
     if (!personId) {
       return "No person";
     }
@@ -792,27 +667,16 @@ function App() {
     );
   }
 
-  function getDebtRemaining(debt: Debt) {
-    if (typeof debt.outstanding === "number") {
-      return Number(debt.outstanding);
-    }
-
-    return (
-      Number(debt.amount) -
-      Number(debt.amount_repaid || 0)
-    );
+  function getDebtRepayments(debtId: number) {
+    return debtRepayments
+      .filter((repayment) => repayment.debt_id === debtId)
+      .reduce((total, repayment) => total + Number(repayment.amount), 0);
   }
 
   function getCreditRepayments(creditId: number) {
     return creditRepayments
-      .filter(
-        (repayment) => repayment.credit_id === creditId
-      )
-      .reduce(
-        (total, repayment) =>
-          total + Number(repayment.amount),
-        0
-      );
+      .filter((repayment) => repayment.credit_id === creditId)
+      .reduce((total, repayment) => total + Number(repayment.amount), 0);
   }
 
   if (!user || !token) {
@@ -831,9 +695,7 @@ function App() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(event) =>
-                  setEmail(event.target.value)
-                }
+                onChange={(event) => setEmail(event.target.value)}
                 placeholder="Enter your email"
                 required
               />
@@ -844,9 +706,7 @@ function App() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(event) =>
-                  setPassword(event.target.value)
-                }
+                onChange={(event) => setPassword(event.target.value)}
                 placeholder="Enter your password"
                 required
               />
@@ -871,10 +731,7 @@ function App() {
           <p>Welcome, {user.name}</p>
         </div>
 
-        <button
-          className="logout-button"
-          onClick={logout}
-        >
+        <button className="logout-button" onClick={logout}>
           Logout
         </button>
       </header>
@@ -886,26 +743,18 @@ function App() {
 
             {selectedSpace && (
               <p>
-                Viewing your{" "}
-                <strong>{selectedSpace.name}</strong>{" "}
-                finance space.
+                Viewing your <strong>{selectedSpace.name}</strong> finance
+                space.
               </p>
             )}
           </div>
 
-          <button
-            onClick={loadDashboard}
-            disabled={loading}
-          >
+          <button onClick={loadDashboard} disabled={loading}>
             {loading ? "Refreshing..." : "Refresh"}
           </button>
         </section>
 
-        {error && (
-          <div className="error-box">
-            {error}
-          </div>
-        )}
+        {error && <div className="error-box">{error}</div>}
 
         <section className="space-section">
           <div className="section-title-row">
@@ -928,9 +777,7 @@ function App() {
                     ? "space-card active"
                     : "space-card"
                 }
-                onClick={() =>
-                  setSelectedSpaceId(space.id)
-                }
+                onClick={() => setSelectedSpaceId(space.id)}
               >
                 <strong>{space.name}</strong>
                 <span>{space.type}</span>
@@ -962,9 +809,7 @@ function App() {
 
               <div className="summary-card">
                 <span>Balance</span>
-                <strong>
-                  {formatMoney(balance)}
-                </strong>
+                <strong>{formatMoney(balance)}</strong>
               </div>
 
               <div className="summary-card">
@@ -983,37 +828,23 @@ function App() {
             </section>
 
             <section className="action-grid">
-              <button
-                onClick={() => setModal("person")}
-              >
+              <button onClick={() => setModal("person")}>
                 + Add Person
               </button>
 
-              <button
-                onClick={() => setModal("debt")}
-              >
+              <button onClick={() => setModal("debt")}>
                 + Add Debt
               </button>
 
-              <button
-                onClick={() =>
-                  setModal("debt-repayment")
-                }
-              >
+              <button onClick={() => setModal("debt-repayment")}>
                 + Debt Repayment
               </button>
 
-              <button
-                onClick={() => setModal("credit")}
-              >
+              <button onClick={() => setModal("credit")}>
                 + Add Credit
               </button>
 
-              <button
-                onClick={() =>
-                  setModal("credit-repayment")
-                }
-              >
+              <button onClick={() => setModal("credit-repayment")}>
                 + Credit Repayment
               </button>
             </section>
@@ -1026,34 +857,22 @@ function App() {
                 </div>
 
                 {selectedIncome.length === 0 ? (
-                  <p className="empty">
-                    No income recorded.
-                  </p>
+                  <p className="empty">No income recorded.</p>
                 ) : (
                   <div className="transaction-list">
                     {selectedIncome.map((item) => (
-                      <div
-                        className="transaction"
-                        key={item.id}
-                      >
+                      <div className="transaction" key={item.id}>
                         <div>
                           <strong>
-                            {item.description ||
-                              "Income"}
+                            {item.description || "Income"}
                           </strong>
-
                           <small>
-                            {formatDate(
-                              item.date_received
-                            )}
+                            {formatDate(item.date_received)}
                           </small>
                         </div>
 
                         <span className="income-value">
-                          +
-                          {formatMoney(
-                            Number(item.amount)
-                          )}
+                          +{formatMoney(Number(item.amount))}
                         </span>
                       </div>
                     ))}
@@ -1064,38 +883,24 @@ function App() {
               <div className="transaction-card">
                 <div className="card-header">
                   <h3>Recent Expenses</h3>
-                  <span>
-                    {selectedExpenses.length}
-                  </span>
+                  <span>{selectedExpenses.length}</span>
                 </div>
 
                 {selectedExpenses.length === 0 ? (
-                  <p className="empty">
-                    No expenses recorded.
-                  </p>
+                  <p className="empty">No expenses recorded.</p>
                 ) : (
                   <div className="transaction-list">
                     {selectedExpenses.map((item) => (
-                      <div
-                        className="transaction"
-                        key={item.id}
-                      >
+                      <div className="transaction" key={item.id}>
                         <div>
                           <strong>
-                            {item.description ||
-                              "Expense"}
+                            {item.description || "Expense"}
                           </strong>
-
-                          <small>
-                            {formatDate(item.date)}
-                          </small>
+                          <small>{formatDate(item.date)}</small>
                         </div>
 
                         <span className="expense-value">
-                          -
-                          {formatMoney(
-                            Number(item.amount)
-                          )}
+                          -{formatMoney(Number(item.amount))}
                         </span>
                       </div>
                     ))}
@@ -1111,30 +916,19 @@ function App() {
               </div>
 
               {selectedPeople.length === 0 ? (
-                <p className="empty">
-                  No people added yet.
-                </p>
+                <p className="empty">No people added yet.</p>
               ) : (
                 <div className="record-list">
                   {selectedPeople.map((person) => (
-                    <div
-                      className="record"
-                      key={person.id}
-                    >
+                    <div className="record" key={person.id}>
                       <div>
-                        <strong>
-                          {person.name}
-                        </strong>
-
+                        <strong>{person.name}</strong>
                         <small>
-                          {person.contact ||
-                            "No contact"}
+                          {person.contact || "No contact"}
                         </small>
                       </div>
 
-                      <span>
-                        {person.note || "—"}
-                      </span>
+                      <span>{person.note || "—"}</span>
                     </div>
                   ))}
                 </div>
@@ -1148,118 +942,69 @@ function App() {
               </div>
 
               {selectedDebts.length === 0 ? (
-                <p className="empty">
-                  No debts recorded.
-                </p>
+                <p className="empty">No debts recorded.</p>
               ) : (
                 <div className="record-list">
-                  {selectedDebts.map((debt) => (
-                    <div
-                      className="record"
-                      key={debt.id}
-                    >
-                      <div>
-                        <strong>
-                          {getPersonName(
-                            debt.person_id
-                          )}
-                        </strong>
+                  {selectedDebts.map((debt) => {
+                    const repaid = getDebtRepayments(debt.id);
+                    const remaining = Number(debt.amount) - repaid;
 
-                        <small>
-                          Borrowed{" "}
-                          {formatDate(
-                            debt.date_borrowed
-                          )}
+                    return (
+                      <div className="record" key={debt.id}>
+                        <div>
+                          <strong>
+                            {getPersonName(debt.person_id)}
+                          </strong>
 
-                          {debt.repayment_date
-                            ? ` · Expected repayment ${formatDate(
-                                debt.repayment_date
-                              )}`
-                            : ""}
+                          <small>
+                            Borrowed {formatDate(debt.date_borrowed)}
+                            {debt.description
+                              ? ` · ${debt.description}`
+                              : ""}
+                          </small>
+                        </div>
 
-                          {debt.description
-                            ? ` · ${debt.description}`
-                            : ""}
-                        </small>
+                        <div className="record-amounts">
+                          <strong className="expense-value">
+                            {formatMoney(Number(debt.amount))}
+                          </strong>
+
+                          <small>
+                            Repaid {formatMoney(repaid)} · Remaining{" "}
+                            {formatMoney(remaining)}
+                          </small>
+                        </div>
                       </div>
-
-                      <div className="record-amounts">
-                        <strong className="expense-value">
-                          {formatMoney(
-                            Number(debt.amount)
-                          )}
-                        </strong>
-
-                        <small>
-                          Repaid{" "}
-                          {formatMoney(
-                            Number(
-                              debt.amount_repaid || 0
-                            )
-                          )}{" "}
-                          · Remaining{" "}
-                          {formatMoney(
-                            getDebtRemaining(debt)
-                          )}
-                        </small>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>
 
             <section className="data-section">
               <div className="card-header">
-                <h3>
-                  Credits — Money Owed to You
-                </h3>
-
-                <span>
-                  {selectedCredits.length}
-                </span>
+                <h3>Credits — Money Owed to You</h3>
+                <span>{selectedCredits.length}</span>
               </div>
 
               {selectedCredits.length === 0 ? (
-                <p className="empty">
-                  No credits recorded.
-                </p>
+                <p className="empty">No credits recorded.</p>
               ) : (
                 <div className="record-list">
                   {selectedCredits.map((credit) => {
-                    const repaid =
-                      getCreditRepayments(
-                        credit.id
-                      );
-
+                    const repaid = getCreditRepayments(credit.id);
                     const remaining =
-                      Number(credit.amount) -
-                      repaid;
+                      Number(credit.amount) - repaid;
 
                     return (
-                      <div
-                        className="record"
-                        key={credit.id}
-                      >
+                      <div className="record" key={credit.id}>
                         <div>
                           <strong>
-                            {getPersonName(
-                              credit.person_id
-                            )}
+                            {getPersonName(credit.person_id)}
                           </strong>
 
                           <small>
-                            Lent{" "}
-                            {formatDate(
-                              credit.date_lent
-                            )}
-
-                            {credit.repayment_date
-                              ? ` · Expected repayment ${formatDate(
-                                  credit.repayment_date
-                                )}`
-                              : ""}
-
+                            Lent {formatDate(credit.date_lent)}
                             {credit.description
                               ? ` · ${credit.description}`
                               : ""}
@@ -1268,20 +1013,12 @@ function App() {
 
                         <div className="record-amounts">
                           <strong className="income-value">
-                            {formatMoney(
-                              Number(
-                                credit.amount
-                              )
-                            )}
+                            {formatMoney(Number(credit.amount))}
                           </strong>
 
                           <small>
-                            Repaid{" "}
-                            {formatMoney(repaid)} ·
-                            Remaining{" "}
-                            {formatMoney(
-                              remaining
-                            )}
+                            Repaid {formatMoney(repaid)} · Remaining{" "}
+                            {formatMoney(remaining)}
                           </small>
                         </div>
                       </div>
@@ -1295,48 +1032,34 @@ function App() {
               <div className="transaction-card">
                 <div className="card-header">
                   <h3>Debt Repayments</h3>
-
-                  <span>
-                    {selectedDebtRepayments.length}
-                  </span>
+                  <span>{debtRepayments.length}</span>
                 </div>
 
-                {selectedDebtRepayments.length ===
-                0 ? (
+                {debtRepayments.length === 0 ? (
                   <p className="empty">
                     No debt repayments recorded.
                   </p>
                 ) : (
                   <div className="transaction-list">
-                    {selectedDebtRepayments.map(
-                      (repayment) => (
-                        <div
-                          className="transaction"
-                          key={repayment.id}
-                        >
-                          <div>
-                            <strong>
-                              Debt #
-                              {repayment.debt_id}
-                            </strong>
-
-                            <small>
-                              {formatDate(
-                                repayment.date
-                              )}
-                            </small>
-                          </div>
-
-                          <span className="expense-value">
-                            {formatMoney(
-                              Number(
-                                repayment.amount
-                              )
-                            )}
-                          </span>
+                    {debtRepayments.map((repayment) => (
+                      <div
+                        className="transaction"
+                        key={repayment.id}
+                      >
+                        <div>
+                          <strong>
+                            Debt #{repayment.debt_id}
+                          </strong>
+                          <small>
+                            {formatDate(repayment.date)}
+                          </small>
                         </div>
-                      )
-                    )}
+
+                        <span className="expense-value">
+                          {formatMoney(Number(repayment.amount))}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -1344,48 +1067,34 @@ function App() {
               <div className="transaction-card">
                 <div className="card-header">
                   <h3>Credit Repayments</h3>
-
-                  <span>
-                    {selectedCreditRepayments.length}
-                  </span>
+                  <span>{creditRepayments.length}</span>
                 </div>
 
-                {selectedCreditRepayments.length ===
-                0 ? (
+                {creditRepayments.length === 0 ? (
                   <p className="empty">
                     No credit repayments recorded.
                   </p>
                 ) : (
                   <div className="transaction-list">
-                    {selectedCreditRepayments.map(
-                      (repayment) => (
-                        <div
-                          className="transaction"
-                          key={repayment.id}
-                        >
-                          <div>
-                            <strong>
-                              Credit #
-                              {repayment.credit_id}
-                            </strong>
-
-                            <small>
-                              {formatDate(
-                                repayment.date
-                              )}
-                            </small>
-                          </div>
-
-                          <span className="income-value">
-                            {formatMoney(
-                              Number(
-                                repayment.amount
-                              )
-                            )}
-                          </span>
+                    {creditRepayments.map((repayment) => (
+                      <div
+                        className="transaction"
+                        key={repayment.id}
+                      >
+                        <div>
+                          <strong>
+                            Credit #{repayment.credit_id}
+                          </strong>
+                          <small>
+                            {formatDate(repayment.date)}
+                          </small>
                         </div>
-                      )
-                    )}
+
+                        <span className="income-value">
+                          {formatMoney(Number(repayment.amount))}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -1395,180 +1104,119 @@ function App() {
       </main>
 
       {modal && (
-        <div
-          className="modal-backdrop"
-          onClick={closeModal}
-        >
+        <div className="modal-backdrop" onClick={closeModal}>
           <div
             className="modal-card"
-            onClick={(event) =>
-              event.stopPropagation()
-            }
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="modal-header">
               <h2>
-                {modal === "finance" &&
-                  "Add Finance Space"}
-
-                {modal === "person" &&
-                  "Add Person"}
-
-                {modal === "debt" &&
-                  "Add Debt"}
-
-                {modal === "debt-repayment" &&
-                  "Record Debt Repayment"}
-
-                {modal === "credit" &&
-                  "Add Credit"}
-
+                {modal === "finance" && "Add Finance Space"}
+                {modal === "person" && "Add Person"}
+                {modal === "debt" && "Add Debt"}
+                {modal === "debt-repayment" && "Record Debt Repayment"}
+                {modal === "credit" && "Add Credit"}
                 {modal === "credit-repayment" &&
                   "Record Credit Repayment"}
               </h2>
 
-              <button onClick={closeModal}>
-                ×
-              </button>
+              <button onClick={closeModal}>×</button>
             </div>
 
             {modal === "finance" && (
-              <form
-                onSubmit={createFinanceSpace}
-              >
-                <label htmlFor="space-name">
-                  Name
-                </label>
+              <form onSubmit={createFinanceSpace}>
+                <label htmlFor="space-name">Name</label>
 
                 <input
                   id="space-name"
                   value={spaceName}
                   onChange={(event) =>
-                    setSpaceName(
-                      event.target.value
-                    )
+                    setSpaceName(event.target.value)
                   }
                   placeholder="e.g. Business"
                   required
                 />
 
-                <label htmlFor="space-type">
-                  Type
-                </label>
+                <label htmlFor="space-type">Type</label>
 
                 <select
                   id="space-type"
                   value={spaceType}
                   onChange={(event) =>
                     setSpaceType(
-                      event.target.value as
-                        | "personal"
-                        | "business"
+                      event.target.value as "personal" | "business"
                     )
                   }
                 >
-                  <option value="personal">
-                    Personal
-                  </option>
-
-                  <option value="business">
-                    Business
-                  </option>
+                  <option value="personal">Personal</option>
+                  <option value="business">Business</option>
                 </select>
 
-                <button type="submit">
-                  Create Finance Space
-                </button>
+                <button type="submit">Create Finance Space</button>
               </form>
             )}
 
             {modal === "person" && (
               <form onSubmit={createPerson}>
-                <label htmlFor="person-name">
-                  Name
-                </label>
+                <label htmlFor="person-name">Name</label>
 
                 <input
                   id="person-name"
                   value={personName}
                   onChange={(event) =>
-                    setPersonName(
-                      event.target.value
-                    )
+                    setPersonName(event.target.value)
                   }
                   placeholder="Person's name"
                   required
                 />
 
-                <label htmlFor="person-contact">
-                  Contact
-                </label>
+                <label htmlFor="person-contact">Contact</label>
 
                 <input
                   id="person-contact"
                   value={personContact}
                   onChange={(event) =>
-                    setPersonContact(
-                      event.target.value
-                    )
+                    setPersonContact(event.target.value)
                   }
                   placeholder="Phone or email"
                 />
 
-                <label htmlFor="person-note">
-                  Note
-                </label>
+                <label htmlFor="person-note">Note</label>
 
                 <textarea
                   id="person-note"
                   value={personNote}
                   onChange={(event) =>
-                    setPersonNote(
-                      event.target.value
-                    )
+                    setPersonNote(event.target.value)
                   }
                   placeholder="Optional note"
                 />
 
-                <button type="submit">
-                  Add Person
-                </button>
+                <button type="submit">Add Person</button>
               </form>
             )}
 
             {modal === "debt" && (
               <form onSubmit={createDebt}>
-                <label htmlFor="debt-person">
-                  Person
-                </label>
+                <label htmlFor="debt-person">Person</label>
 
                 <select
                   id="debt-person"
                   value={debtPersonId}
                   onChange={(event) =>
-                    setDebtPersonId(
-                      event.target.value
-                    )
+                    setDebtPersonId(event.target.value)
                   }
                 >
-                  <option value="">
-                    No person
-                  </option>
+                  <option value="">No person</option>
 
-                  {selectedPeople.map(
-                    (person) => (
-                      <option
-                        key={person.id}
-                        value={person.id}
-                      >
-                        {person.name}
-                      </option>
-                    )
-                  )}
+                  {selectedPeople.map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
                 </select>
 
-                <label htmlFor="debt-amount">
-                  Amount
-                </label>
+                <label htmlFor="debt-amount">Amount</label>
 
                 <input
                   id="debt-amount"
@@ -1577,25 +1225,19 @@ function App() {
                   step="0.01"
                   value={debtAmount}
                   onChange={(event) =>
-                    setDebtAmount(
-                      event.target.value
-                    )
+                    setDebtAmount(event.target.value)
                   }
                   required
                 />
 
-                <label htmlFor="debt-date">
-                  Date Borrowed
-                </label>
+                <label htmlFor="debt-date">Date Borrowed</label>
 
                 <input
                   id="debt-date"
                   type="date"
                   value={debtDate}
                   onChange={(event) =>
-                    setDebtDate(
-                      event.target.value
-                    )
+                    setDebtDate(event.target.value)
                   }
                   required
                 />
@@ -1609,9 +1251,7 @@ function App() {
                   type="date"
                   value={debtRepaymentDate}
                   onChange={(event) =>
-                    setDebtRepaymentDate(
-                      event.target.value
-                    )
+                    setDebtRepaymentDate(event.target.value)
                   }
                 />
 
@@ -1623,22 +1263,16 @@ function App() {
                   id="debt-description"
                   value={debtDescription}
                   onChange={(event) =>
-                    setDebtDescription(
-                      event.target.value
-                    )
+                    setDebtDescription(event.target.value)
                   }
                 />
 
-                <button type="submit">
-                  Create Debt
-                </button>
+                <button type="submit">Create Debt</button>
               </form>
             )}
 
             {modal === "debt-repayment" && (
-              <form
-                onSubmit={createDebtRepayment}
-              >
+              <form onSubmit={createDebtRepayment}>
                 <label htmlFor="debt-repayment-debt">
                   Debt
                 </label>
@@ -1647,29 +1281,17 @@ function App() {
                   id="debt-repayment-debt"
                   value={debtRepaymentDebtId}
                   onChange={(event) =>
-                    setDebtRepaymentDebtId(
-                      event.target.value
-                    )
+                    setDebtRepaymentDebtId(event.target.value)
                   }
                   required
                 >
-                  <option value="">
-                    Select debt
-                  </option>
+                  <option value="">Select debt</option>
 
                   {selectedDebts.map((debt) => (
-                    <option
-                      key={debt.id}
-                      value={debt.id}
-                    >
+                    <option key={debt.id} value={debt.id}>
                       Debt #{debt.id} —{" "}
-                      {getPersonName(
-                        debt.person_id
-                      )}{" "}
-                      — Remaining{" "}
-                      {formatMoney(
-                        getDebtRemaining(debt)
-                      )}
+                      {getPersonName(debt.person_id)} —{" "}
+                      {formatMoney(Number(debt.amount))}
                     </option>
                   ))}
                 </select>
@@ -1685,9 +1307,7 @@ function App() {
                   step="0.01"
                   value={debtRepaymentAmount}
                   onChange={(event) =>
-                    setDebtRepaymentAmount(
-                      event.target.value
-                    )
+                    setDebtRepaymentAmount(event.target.value)
                   }
                   required
                 />
@@ -1699,13 +1319,9 @@ function App() {
                 <input
                   id="debt-repayment-date-value"
                   type="date"
-                  value={
-                    debtRepaymentDateValue
-                  }
+                  value={debtRepaymentDateValue}
                   onChange={(event) =>
-                    setDebtRepaymentDateValue(
-                      event.target.value
-                    )
+                    setDebtRepaymentDateValue(event.target.value)
                   }
                   required
                 />
@@ -1718,38 +1334,25 @@ function App() {
 
             {modal === "credit" && (
               <form onSubmit={createCredit}>
-                <label htmlFor="credit-person">
-                  Person
-                </label>
+                <label htmlFor="credit-person">Person</label>
 
                 <select
                   id="credit-person"
                   value={creditPersonId}
                   onChange={(event) =>
-                    setCreditPersonId(
-                      event.target.value
-                    )
+                    setCreditPersonId(event.target.value)
                   }
                 >
-                  <option value="">
-                    No person
-                  </option>
+                  <option value="">No person</option>
 
-                  {selectedPeople.map(
-                    (person) => (
-                      <option
-                        key={person.id}
-                        value={person.id}
-                      >
-                        {person.name}
-                      </option>
-                    )
-                  )}
+                  {selectedPeople.map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
                 </select>
 
-                <label htmlFor="credit-amount">
-                  Amount
-                </label>
+                <label htmlFor="credit-amount">Amount</label>
 
                 <input
                   id="credit-amount"
@@ -1758,25 +1361,19 @@ function App() {
                   step="0.01"
                   value={creditAmount}
                   onChange={(event) =>
-                    setCreditAmount(
-                      event.target.value
-                    )
+                    setCreditAmount(event.target.value)
                   }
                   required
                 />
 
-                <label htmlFor="credit-date">
-                  Date Lent
-                </label>
+                <label htmlFor="credit-date">Date Lent</label>
 
                 <input
                   id="credit-date"
                   type="date"
                   value={creditDate}
                   onChange={(event) =>
-                    setCreditDate(
-                      event.target.value
-                    )
+                    setCreditDate(event.target.value)
                   }
                   required
                 />
@@ -1790,9 +1387,7 @@ function App() {
                   type="date"
                   value={creditRepaymentDate}
                   onChange={(event) =>
-                    setCreditRepaymentDate(
-                      event.target.value
-                    )
+                    setCreditRepaymentDate(event.target.value)
                   }
                 />
 
@@ -1804,61 +1399,37 @@ function App() {
                   id="credit-description"
                   value={creditDescription}
                   onChange={(event) =>
-                    setCreditDescription(
-                      event.target.value
-                    )
+                    setCreditDescription(event.target.value)
                   }
                 />
 
-                <button type="submit">
-                  Create Credit
-                </button>
+                <button type="submit">Create Credit</button>
               </form>
             )}
 
             {modal === "credit-repayment" && (
-              <form
-                onSubmit={createCreditRepayment}
-              >
+              <form onSubmit={createCreditRepayment}>
                 <label htmlFor="credit-repayment-credit">
                   Credit
                 </label>
 
                 <select
                   id="credit-repayment-credit"
-                  value={
-                    creditRepaymentCreditId
-                  }
+                  value={creditRepaymentCreditId}
                   onChange={(event) =>
-                    setCreditRepaymentCreditId(
-                      event.target.value
-                    )
+                    setCreditRepaymentCreditId(event.target.value)
                   }
                   required
                 >
-                  <option value="">
-                    Select credit
-                  </option>
+                  <option value="">Select credit</option>
 
-                  {selectedCredits.map(
-                    (credit) => (
-                      <option
-                        key={credit.id}
-                        value={credit.id}
-                      >
-                        Credit #{credit.id} —{" "}
-                        {getPersonName(
-                          credit.person_id
-                        )}{" "}
-                        —{" "}
-                        {formatMoney(
-                          Number(
-                            credit.amount
-                          )
-                        )}
-                      </option>
-                    )
-                  )}
+                  {selectedCredits.map((credit) => (
+                    <option key={credit.id} value={credit.id}>
+                      Credit #{credit.id} —{" "}
+                      {getPersonName(credit.person_id)} —{" "}
+                      {formatMoney(Number(credit.amount))}
+                    </option>
+                  ))}
                 </select>
 
                 <label htmlFor="credit-repayment-amount">
@@ -1872,9 +1443,7 @@ function App() {
                   step="0.01"
                   value={creditRepaymentAmount}
                   onChange={(event) =>
-                    setCreditRepaymentAmount(
-                      event.target.value
-                    )
+                    setCreditRepaymentAmount(event.target.value)
                   }
                   required
                 />
@@ -1886,13 +1455,9 @@ function App() {
                 <input
                   id="credit-repayment-date-value"
                   type="date"
-                  value={
-                    creditRepaymentDateValue
-                  }
+                  value={creditRepaymentDateValue}
                   onChange={(event) =>
-                    setCreditRepaymentDateValue(
-                      event.target.value
-                    )
+                    setCreditRepaymentDateValue(event.target.value)
                   }
                   required
                 />
