@@ -15,7 +15,11 @@ type CreditRepayment struct {
 	Date     time.Time `json:"date"`
 }
 
-var ErrCreditNotFound = errors.New("credit not found")
+var (
+	ErrCreditNotFound    = errors.New("credit not found")
+	ErrInvalidAmount     = errors.New("invalid amount")
+	ErrRepaymentTooLarge = errors.New("repayment exceeds outstanding credit")
+)
 
 func Create(
 	ctx context.Context,
@@ -26,27 +30,49 @@ func Create(
 	date time.Time,
 ) (CreditRepayment, error) {
 
-	var exists bool
+	if amount <= 0 {
+		return CreditRepayment{}, ErrInvalidAmount
+	}
+
+	var creditAmount float64
+	var amountRepaid float64
 
 	err := conn.QueryRow(
 		ctx,
-		`SELECT EXISTS (
-			SELECT 1
-			FROM credits c
-			JOIN finance_spaces fs
-				ON c.finance_space_id = fs.id
-			WHERE c.id = $1 AND fs.user_id = $2
-		)`,
+		`SELECT
+			c.amount,
+			COALESCE(
+				(
+					SELECT SUM(cr.amount)
+					FROM credit_repayments cr
+					WHERE cr.credit_id = c.id
+				),
+				0
+			)
+		FROM credits c
+		JOIN finance_spaces fs
+			ON c.finance_space_id = fs.id
+		WHERE c.id = $1
+		AND fs.user_id = $2`,
 		creditID,
 		userID,
-	).Scan(&exists)
+	).Scan(
+		&creditAmount,
+		&amountRepaid,
+	)
 
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return CreditRepayment{}, ErrCreditNotFound
+		}
+
 		return CreditRepayment{}, err
 	}
 
-	if !exists {
-		return CreditRepayment{}, ErrCreditNotFound
+	outstanding := creditAmount - amountRepaid
+
+	if outstanding <= 0 || amount > outstanding {
+		return CreditRepayment{}, ErrRepaymentTooLarge
 	}
 
 	var repayment CreditRepayment
@@ -106,7 +132,7 @@ func List(
 
 	defer rows.Close()
 
-	var repayments []CreditRepayment
+	repayments := make([]CreditRepayment, 0)
 
 	for rows.Next() {
 		var repayment CreditRepayment

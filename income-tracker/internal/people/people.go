@@ -3,6 +3,7 @@ package people
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -15,7 +16,10 @@ type Person struct {
 	Note           string `json:"note,omitempty"`
 }
 
-var ErrFinanceSpaceNotFound = errors.New("finance space not found")
+var (
+	ErrFinanceSpaceNotFound = errors.New("finance space not found")
+	ErrInvalidName          = errors.New("invalid person name")
+)
 
 func Create(
 	ctx context.Context,
@@ -27,6 +31,12 @@ func Create(
 	note string,
 ) (Person, error) {
 
+	name = strings.TrimSpace(name)
+
+	if name == "" {
+		return Person{}, ErrInvalidName
+	}
+
 	var exists bool
 
 	err := conn.QueryRow(
@@ -34,7 +44,8 @@ func Create(
 		`SELECT EXISTS (
 			SELECT 1
 			FROM finance_spaces
-			WHERE id = $1 AND user_id = $2
+			WHERE id = $1
+			AND user_id = $2
 		)`,
 		financeSpaceID,
 		userID,
@@ -107,7 +118,7 @@ func List(
 
 	defer rows.Close()
 
-	var people []Person
+	people := make([]Person, 0)
 
 	for rows.Next() {
 		var person Person

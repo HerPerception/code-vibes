@@ -23,6 +23,7 @@ type CreateRequest struct {
 
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(auth.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -36,6 +37,7 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	date, err := time.Parse("2006-01-02", req.Date)
+
 	if err != nil {
 		http.Error(w, "invalid date", http.StatusBadRequest)
 		return
@@ -51,12 +53,20 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		if errors.Is(err, ErrDebtNotFound) {
+		switch {
+		case errors.Is(err, ErrDebtNotFound):
 			http.Error(w, "debt not found", http.StatusNotFound)
-			return
+
+		case errors.Is(err, ErrInvalidAmount):
+			http.Error(w, "amount must be greater than zero", http.StatusBadRequest)
+
+		case errors.Is(err, ErrRepaymentTooLarge):
+			http.Error(w, "repayment exceeds outstanding debt", http.StatusBadRequest)
+
+		default:
+			http.Error(w, "could not create debt repayment", http.StatusInternalServerError)
 		}
 
-		http.Error(w, "could not create debt repayment", http.StatusInternalServerError)
 		return
 	}
 
@@ -68,12 +78,17 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(auth.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	repayments, err := List(r.Context(), h.Conn, userID)
+	repayments, err := List(
+		r.Context(),
+		h.Conn,
+		userID,
+	)
 
 	if err != nil {
 		http.Error(w, "could not get debt repayments", http.StatusInternalServerError)

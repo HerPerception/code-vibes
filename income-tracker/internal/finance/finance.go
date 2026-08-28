@@ -17,8 +17,8 @@ type FinanceSpace struct {
 
 var (
 	ErrInvalidType   = errors.New("invalid finance space type")
-	ErrInvalidName   = errors.New("finance space name cannot be empty")
-	ErrDuplicateName = errors.New("finance space with this name already exists")
+	ErrInvalidName   = errors.New("invalid finance space name")
+	ErrDuplicateName = errors.New("duplicate finance space name")
 )
 
 func Create(
@@ -28,6 +28,7 @@ func Create(
 	name string,
 	spaceType string,
 ) (FinanceSpace, error) {
+
 	name = strings.TrimSpace(name)
 
 	if name == "" {
@@ -38,25 +39,26 @@ func Create(
 		return FinanceSpace{}, ErrInvalidType
 	}
 
-	var existingID int
+	var exists bool
 
 	err := conn.QueryRow(
 		ctx,
-		`SELECT id
-		 FROM finance_spaces
-		 WHERE user_id = $1
-		   AND LOWER(name) = LOWER($2)
-		 LIMIT 1`,
+		`SELECT EXISTS (
+			SELECT 1
+			FROM finance_spaces
+			WHERE user_id = $1
+			AND LOWER(name) = LOWER($2)
+		)`,
 		userID,
 		name,
-	).Scan(&existingID)
+	).Scan(&exists)
 
-	if err == nil {
-		return FinanceSpace{}, ErrDuplicateName
+	if err != nil {
+		return FinanceSpace{}, err
 	}
 
-	if !errors.Is(err, pgx.ErrNoRows) {
-		return FinanceSpace{}, err
+	if exists {
+		return FinanceSpace{}, ErrDuplicateName
 	}
 
 	var space FinanceSpace
@@ -88,6 +90,7 @@ func List(
 	conn *pgx.Conn,
 	userID int,
 ) ([]FinanceSpace, error) {
+
 	rows, err := conn.Query(
 		ctx,
 		`SELECT id, name, type, user_id
@@ -96,12 +99,14 @@ func List(
 		 ORDER BY id`,
 		userID,
 	)
+
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
-	var spaces []FinanceSpace
+	spaces := make([]FinanceSpace, 0)
 
 	for rows.Next() {
 		var space FinanceSpace
@@ -112,6 +117,7 @@ func List(
 			&space.Type,
 			&space.UserID,
 		)
+
 		if err != nil {
 			return nil, err
 		}

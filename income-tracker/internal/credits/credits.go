@@ -13,12 +13,19 @@ type Credit struct {
 	FinanceSpaceID int        `json:"finance_space_id"`
 	PersonID       *int       `json:"person_id,omitempty"`
 	Amount         float64    `json:"amount"`
+	AmountRepaid   float64    `json:"amount_repaid"`
+	Outstanding    float64    `json:"outstanding"`
 	DateLent       time.Time  `json:"date_lent"`
 	RepaymentDate  *time.Time `json:"repayment_date,omitempty"`
 	Description    string     `json:"description,omitempty"`
 }
 
-var ErrFinanceSpaceNotFound = errors.New("finance space not found")
+var (
+	ErrFinanceSpaceNotFound = errors.New("finance space not found")
+	ErrPersonNotFound       = errors.New("person not found")
+	ErrInvalidAmount        = errors.New("invalid amount")
+	ErrInvalidRepaymentDate = errors.New("invalid repayment date")
+)
 
 func Create(
 	ctx context.Context,
@@ -32,25 +39,58 @@ func Create(
 	description string,
 ) (Credit, error) {
 
-	var exists bool
+	if amount <= 0 {
+		return Credit{}, ErrInvalidAmount
+	}
+
+	if repaymentDate != nil && repaymentDate.Before(dateLent) {
+		return Credit{}, ErrInvalidRepaymentDate
+	}
+
+	var spaceExists bool
 
 	err := conn.QueryRow(
 		ctx,
 		`SELECT EXISTS (
 			SELECT 1
 			FROM finance_spaces
-			WHERE id = $1 AND user_id = $2
+			WHERE id = $1
+			AND user_id = $2
 		)`,
 		financeSpaceID,
 		userID,
-	).Scan(&exists)
+	).Scan(&spaceExists)
 
 	if err != nil {
 		return Credit{}, err
 	}
 
-	if !exists {
+	if !spaceExists {
 		return Credit{}, ErrFinanceSpaceNotFound
+	}
+
+	if personID != nil {
+		var personExists bool
+
+		err = conn.QueryRow(
+			ctx,
+			`SELECT EXISTS (
+				SELECT 1
+				FROM people
+				WHERE id = $1
+				AND finance_space_id = $2
+			)`,
+			*personID,
+			financeSpaceID,
+		).Scan(&personExists)
+
+		if err != nil {
+			return Credit{}, err
+		}
+
+		if !personExists {
+			return Credit{}, ErrPersonNotFound
+		}
 	}
 
 	var credit Credit
@@ -94,6 +134,9 @@ func Create(
 		return Credit{}, err
 	}
 
+	credit.AmountRepaid = 0
+	credit.Outstanding = amount
+
 	return credit, nil
 }
 
@@ -110,6 +153,14 @@ func List(
 			c.finance_space_id,
 			c.person_id,
 			c.amount,
+			COALESCE(
+				(
+					SELECT SUM(cr.amount)
+					FROM credit_repayments cr
+					WHERE cr.credit_id = c.id
+				),
+				0
+			) AS amount_repaid,
 			c.date_lent,
 			c.repayment_date,
 			c.description
@@ -127,7 +178,7 @@ func List(
 
 	defer rows.Close()
 
-	var credits []Credit
+	credits := make([]Credit, 0)
 
 	for rows.Next() {
 		var credit Credit
@@ -137,6 +188,7 @@ func List(
 			&credit.FinanceSpaceID,
 			&credit.PersonID,
 			&credit.Amount,
+			&credit.AmountRepaid,
 			&credit.DateLent,
 			&credit.RepaymentDate,
 			&credit.Description,
@@ -144,6 +196,12 @@ func List(
 
 		if err != nil {
 			return nil, err
+		}
+
+		credit.Outstanding = credit.Amount - credit.AmountRepaid
+
+		if credit.Outstanding < 0 {
+			credit.Outstanding = 0
 		}
 
 		credits = append(credits, credit)

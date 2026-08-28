@@ -21,6 +21,7 @@ type CreateRequest struct {
 
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(auth.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -28,8 +29,7 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	var req CreateRequest
 
-	err := json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
@@ -45,32 +45,16 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, ErrInvalidName):
-			http.Error(
-				w,
-				"finance space name cannot be empty",
-				http.StatusBadRequest,
-			)
+			http.Error(w, "finance space name cannot be empty", http.StatusBadRequest)
 
 		case errors.Is(err, ErrInvalidType):
-			http.Error(
-				w,
-				"type must be personal or business",
-				http.StatusBadRequest,
-			)
+			http.Error(w, "type must be personal or business", http.StatusBadRequest)
 
 		case errors.Is(err, ErrDuplicateName):
-			http.Error(
-				w,
-				"you already have a finance space with this name",
-				http.StatusConflict,
-			)
+			http.Error(w, "you already have a finance space with this name", http.StatusConflict)
 
 		default:
-			http.Error(
-				w,
-				"could not create finance space",
-				http.StatusInternalServerError,
-			)
+			http.Error(w, "could not create finance space", http.StatusInternalServerError)
 		}
 
 		return
@@ -84,6 +68,7 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(auth.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -96,11 +81,7 @@ func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(
-			w,
-			"could not get finance spaces",
-			http.StatusInternalServerError,
-		)
+		http.Error(w, "could not get finance spaces", http.StatusInternalServerError)
 		return
 	}
 

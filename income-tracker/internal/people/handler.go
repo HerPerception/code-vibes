@@ -23,6 +23,7 @@ type CreateRequest struct {
 
 func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(auth.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -46,12 +47,17 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		if errors.Is(err, ErrFinanceSpaceNotFound) {
+		switch {
+		case errors.Is(err, ErrFinanceSpaceNotFound):
 			http.Error(w, "finance space not found", http.StatusNotFound)
-			return
+
+		case errors.Is(err, ErrInvalidName):
+			http.Error(w, "person name cannot be empty", http.StatusBadRequest)
+
+		default:
+			http.Error(w, "could not create person", http.StatusInternalServerError)
 		}
 
-		http.Error(w, "could not create person", http.StatusInternalServerError)
 		return
 	}
 
@@ -63,12 +69,17 @@ func (h Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 func (h Handler) List(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(auth.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	people, err := List(r.Context(), h.Conn, userID)
+	people, err := List(
+		r.Context(),
+		h.Conn,
+		userID,
+	)
 
 	if err != nil {
 		http.Error(w, "could not get people", http.StatusInternalServerError)
