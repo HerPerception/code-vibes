@@ -111,6 +111,9 @@ function App() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [registrationMessage, setRegistrationMessage] = useState("");
 
   const [financeSpaces, setFinanceSpaces] = useState<FinanceSpace[]>([]);
   const [selectedSpaceId, setSelectedSpaceId] = useState<number | null>(null);
@@ -288,6 +291,48 @@ function App() {
       setPassword("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function register(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError("");
+    setRegistrationMessage("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        }),
+      });
+
+      const message = await response.text();
+
+      if (!response.ok) {
+        throw new Error(message.trim() || "Could not create account.");
+      }
+
+      setName("");
+      setEmail("");
+      setPassword("");
+      setAuthMode("login");
+      setRegistrationMessage(
+        "Account created successfully. Please log in."
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Could not create account."
+      );
     } finally {
       setLoading(false);
     }
@@ -690,35 +735,107 @@ function App() {
           <h1>Income Tracker</h1>
 
           <div className="login-card">
-            <h2>Login</h2>
+            <h2>
+              {authMode === "register" ? "Create Account" : "Login"}
+            </h2>
 
-            <form onSubmit={login}>
-              <label htmlFor="email">Email</label>
+            {authMode === "register" ? (
+              <form onSubmit={register}>
+                <label htmlFor="name">Name</label>
 
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter your email"
-                required
-              />
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Enter your name"
+                  required
+                />
 
-              <label htmlFor="password">Password</label>
+                <label htmlFor="register-email">Email</label>
 
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Enter your password"
-                required
-              />
+                <input
+                  id="register-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
 
-              <button type="submit" disabled={loading}>
-                {loading ? "Logging in..." : "Login"}
-              </button>
-            </form>
+                <label htmlFor="register-password">Password</label>
+
+                <input
+                  id="register-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Create a password"
+                  minLength={8}
+                  required
+                />
+
+                <button type="submit" disabled={loading}>
+                  {loading ? "Creating account..." : "Create Account"}
+                </button>
+
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setAuthMode("login");
+                    setError("");
+                    setRegistrationMessage("");
+                  }}
+                >
+                  Already have an account? Login
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={login}>
+                <label htmlFor="login-email">Email</label>
+
+                <input
+                  id="login-email"
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="Enter your email"
+                  required
+                />
+
+                <label htmlFor="login-password">Password</label>
+
+                <input
+                  id="login-password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+
+                <button type="submit" disabled={loading}>
+                  {loading ? "Logging in..." : "Login"}
+                </button>
+
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() => {
+                    setAuthMode("register");
+                    setError("");
+                    setRegistrationMessage("");
+                  }}
+                >
+                  Create an account
+                </button>
+              </form>
+            )}
+
+            {registrationMessage && (
+              <p className="success">{registrationMessage}</p>
+            )}
 
             {error && <p className="error">{error}</p>}
           </div>
