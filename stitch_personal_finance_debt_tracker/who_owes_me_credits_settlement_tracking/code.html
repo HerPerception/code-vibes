@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "secondary-container": "#00a572",
+                "surface-dim": "#0f131d",
+                "on-error-container": "#ffdad6",
+                "surface-tint": "#adc6ff",
+                "on-secondary-fixed": "#002113",
+                "on-tertiary-fixed": "#40000d",
+                "primary-fixed": "#d8e2ff",
+                "on-primary-fixed-variant": "#004395",
+                "on-tertiary-container": "#5b0017",
+                "on-surface-variant": "#c2c6d6",
+                "tertiary": "#ffb2b7",
+                "on-error": "#690005",
+                "surface-container": "#1c1f2a",
+                "inverse-on-surface": "#2c303b",
+                "primary-container": "#4d8eff",
+                "error-container": "#93000a",
+                "primary-fixed-dim": "#adc6ff",
+                "inverse-primary": "#005ac2",
+                "surface-bright": "#353944",
+                "on-tertiary-fixed-variant": "#92002a",
+                "on-primary-fixed": "#001a42",
+                "secondary-fixed-dim": "#4edea3",
+                "on-primary-container": "#00285d",
+                "tertiary-fixed": "#ffdadb",
+                "tertiary-fixed-dim": "#ffb2b7",
+                "on-secondary-fixed-variant": "#005236",
+                "on-background": "#dfe2f1",
+                "surface-container-low": "#171b26",
+                "on-tertiary": "#67001b",
+                "surface-container-high": "#262a35",
+                "background": "#0f131d",
+                "secondary": "#4edea3",
+                "primary": "#adc6ff",
+                "tertiary-container": "#ff516a",
+                "outline": "#8c909f",
+                "error": "#ffb4ab",
+                "on-primary": "#002e6a",
+                "on-secondary": "#003824",
+                "outline-variant": "#424754",
+                "on-surface": "#dfe2f1",
+                "surface-container-highest": "#313540",
+                "inverse-surface": "#dfe2f1",
+                "surface-variant": "#313540",
+                "on-secondary-container": "#00311f",
+                "secondary-fixed": "#6ffbbe",
+                "surface": "#0f131d",
+                "surface-container-lowest": "#0a0e18"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "space-xl": "2rem",
+                "container-max": "80rem",
+                "gutter-desktop": "1.5rem",
+                "gutter-mobile": "1rem",
+                "space-2xs": "0.25rem",
+                "space-3xl": "4rem",
+                "space-sm": "0.75rem",
+                "space-lg": "1.5rem",
+                "space-xs": "0.5rem",
+                "space-md": "1rem",
+                "space-2xl": "3rem"
+        },
+        "fontFamily": {
+                "body-md": ["Inter"],
+                "body-lg": ["Inter"],
+                "headline-sm": ["Plus Jakarta Sans"],
+                "body-sm": ["Inter"],
+                "headline-lg": ["Plus Jakarta Sans"],
+                "headline-md": ["Plus Jakarta Sans"],
+                "currency-stat": ["Inter"],
+                "headline-lg-mobile": ["Plus Jakarta Sans"],
+                "display-hero": ["Plus Jakarta Sans"],
+                "label-caps": ["Inter"],
+                "data-mono": ["Inter"],
+                "display-hero-mobile": ["Plus Jakarta Sans"]
+        },
+        "fontSize": {
+                "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+                "headline-sm": ["18px", {"lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "body-sm": ["12px", {"lineHeight": "18px", "letterSpacing": "0", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+                "currency-stat": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "headline-lg-mobile": ["26px", {"lineHeight": "34px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+                "display-hero": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "800"}],
+                "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600"}],
+                "data-mono": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                "display-hero-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "800"}]
+        }
+      }
+    }
+  }</script></head><body class="bg-background font-body-md text-body-md text-on-surface min-h-screen selection:bg-primary-container selection:text-on-primary-container"><aside class="fixed left-0 top-0 h-full w-64 bg-surface-container-lowest z-50 flex flex-col justify-between p-space-md border-r border-outline-variant/30"><div class="flex flex-col gap-space-lg"><div class="flex items-center gap-space-sm px-space-xs py-space-2xs"><img alt="Aegis Ledger Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UVMmNJH0RjUBj2pPKKdPeHdMfjWaMJFuKG-KsLUbfitruGfzTTT6D_GVOAmP2EJ3pbTq7PszycYmTgcspnf6rV6eAzvHIsF_V5JzwBZoPzSTFpZGFCTWwEHBxnbOUqh0t_XbQJzjCO3rd4Za9aGob5ECmZ9RIU8SVSUFb6oXTndPiN6Jz8pgGxGHl2PuJaFNg23rhaSB7tKcucaZVZlhQAPL3dJY1d48JZJV1_F7Es9f-Lj_CUyl6NGQ"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">Aegis Ledger</span><span class="font-label-caps text-label-caps uppercase text-outline tracking-wider mt-space-2xs">Sovereign Reserve</span></div></div><div class="px-space-xs"><span class="font-label-caps text-label-caps uppercase text-outline font-semibold tracking-wider">Financial Command</span></div><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-surface-container-high text-primary font-semibold shadow-[0_0_16px_-4px_rgba(77,142,255,0.25)]"><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="overview-dashboard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Overview</span></div><span class="material-symbols-outlined text-[16px] text-outline opacity-40">chevron_right</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="inflow-and-outflow" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">swap_vert</span><span class="font-body-md text-body-md">Inflow &amp; Outflow</span></div><span class="font-data-mono text-body-sm text-outline">Ledger</span></a><a aria-current="page" class="flex items-center justify-between px-space-md py-space-sm rounded-lg transition-colors bg-surface-container-high text-primary font-semibold shadow-[0_0_16px_-4px_rgba(77,142,255,0.25)]" data-path="who-owes-me" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">south_west</span><span class="font-body-md text-body-md">Who Owes Me</span></div><span class="px-space-xs py-space-2xs rounded-full bg-secondary/10 border border-secondary/30 text-secondary font-data-mono text-body-sm leading-none">Active</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="i-owe-who" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">north_east</span><span class="font-body-md text-body-md">I Owe Who</span></div><span class="px-space-xs py-space-2xs rounded-full bg-tertiary-container/20 border border-tertiary-container/40 text-tertiary font-data-mono text-body-sm leading-none">Liabilities</span></a></nav></div><div class="flex flex-col gap-space-md pt-space-md border-t border-outline-variant/30"><div class="px-space-xs"><span class="font-label-caps text-label-caps uppercase text-outline font-semibold tracking-wider">System Operations</span></div><nav class="flex flex-col gap-space-2xs" data-active-classes="bg-surface-container-high text-primary font-semibold"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="export-reports" href="#"><span class="material-symbols-outlined text-[20px]">file_download</span><span class="font-body-md text-body-md">Export Reports</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px]">tune</span><span class="font-body-md text-body-md">Settings</span></a></nav><div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low border border-outline-variant/20"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-full bg-surface-bright flex items-center justify-center border border-outline-variant/40"><span class="material-symbols-outlined text-primary text-[20px]">shield_person</span></div><div class="flex flex-col min-w-0"><span class="font-body-md text-body-md font-semibold text-on-surface truncate">Alex Morgan</span><span class="font-label-caps text-label-caps text-secondary font-medium tracking-wide">Pro Account</span></div></div><button aria-label="Account Actions" class="text-outline hover:text-on-surface transition-colors p-space-2xs"><span class="material-symbols-outlined text-[18px]">more_vert</span></button></div></div></aside><div class="pl-64 flex flex-col min-h-screen"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/80 backdrop-blur-xl border-b border-outline-variant/30 z-40 px-space-lg"><div class="h-full w-full max-w-container-max mx-auto flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-sm text-body-sm font-body-sm"><span class="text-outline hover:text-on-surface-variant transition-colors flex items-center gap-space-2xs"><span class="material-symbols-outlined text-[16px]">corporate_fare</span>Treasury</span><span class="text-outline-variant">/</span><span class="text-on-surface font-semibold">Command Feed</span></div><div class="flex-1 max-w-md mx-space-lg"><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-md text-outline text-[18px]">search</span><input class="w-full h-10 pl-10 pr-16 bg-surface-container-low border border-outline-variant/40 rounded-lg text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Search transactions, counter-parties, or ledgers..." type="text"/><div class="absolute right-space-sm flex items-center gap-space-2xs"><kbd class="px-space-2xs py-0.5 rounded bg-surface-container-high border border-outline-variant/50 text-outline font-data-mono text-[10px]">⌘K</kbd></div></div></div><div class="flex items-center gap-space-md"><button class="h-9 px-space-md rounded-lg bg-surface-container-low border border-outline-variant/40 hover:border-outline text-on-surface flex items-center gap-space-2xs transition-all"><span class="font-data-mono text-body-sm text-secondary font-semibold">USD $</span><span class="material-symbols-outlined text-[16px] text-outline">unfold_more</span></button><button class="h-9 px-space-md rounded-lg bg-primary-container hover:bg-primary-fixed-dim text-on-primary-container font-headline-sm text-body-sm flex items-center gap-space-2xs transition-all shadow-[0_0_14px_rgba(77,142,255,0.3)]"><span class="material-symbols-outlined text-[18px]">add</span><span>Record</span></button><button aria-label="Notifications" class="relative p-space-xs rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary ring-2 ring-surface-container-lowest"></span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full flex-1 pt-16 bg-background px-space-lg py-space-lg"><div class="max-w-container-max mx-auto"><div class="flex flex-col w-full gap-space-xl">
+<!-- Top Command Context Bar -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest bg-surface-container-high px-space-xs py-0.5 rounded">Receivables Stream</span>
+<span class="text-outline font-data-mono text-body-sm">/ Sovereign Ledger 04</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Who Owes Me (Credits)</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Track capital lent, pending counterparty receivables, and progressive settlement milestones with mathematical accuracy.</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<button class="h-10 px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-body-md text-body-md flex items-center gap-space-xs shadow-sm transition-colors" onclick="document.getElementById('filter-drawer').classList.toggle('hidden')">
+<span class="material-symbols-outlined text-[18px] text-outline">tune</span>
+<span>Filter &amp; Sort</span>
+</button>
+<button class="h-10 px-space-md rounded-lg bg-primary hover:bg-primary-fixed-dim text-on-primary font-headline-sm text-body-md flex items-center gap-space-xs shadow-[0_0_20px_-3px_rgba(77,142,255,0.35)] transition-all" id="open-modal-btn">
+<span class="material-symbols-outlined text-[20px]">add_circle</span>
+<span>+ Record New Credit / Loan</span>
+</button>
+</div>
+</div>
+<!-- Summary Metric Strip -->
+<section aria-label="Receivables KPI Strip" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Card 1 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low p-space-lg shadow-md flex flex-col justify-between">
+<div class="absolute -right-8 -top-8 w-28 h-28 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Total Outstanding</span>
+<span class="material-symbols-outlined text-[20px] text-primary">account_balance_wallet</span>
+</div>
+<div class="my-space-sm">
+<div class="font-currency-stat text-currency-stat text-on-surface tracking-tight tabular-nums">$6,800.00</div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span> 4 Counterparties
+        </span>
+<span class="font-data-mono text-secondary bg-surface-container px-space-xs py-0.5 rounded">+4.2% active</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low p-space-lg shadow-md flex flex-col justify-between">
+<div class="absolute -right-8 -top-8 w-28 h-28 bg-secondary/15 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Collected This Month</span>
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+</div>
+<div class="my-space-sm">
+<div class="font-currency-stat text-currency-stat text-secondary tracking-tight tabular-nums">$1,400.00</div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">2 payments settled</span>
+<span class="font-data-mono text-secondary flex items-center text-body-sm">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span> 20.5%
+        </span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low p-space-lg shadow-md flex flex-col justify-between">
+<div class="absolute -right-8 -top-8 w-28 h-28 bg-surface-bright/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Partially Settled</span>
+<span class="material-symbols-outlined text-[20px] text-on-surface-variant">hourglass_top</span>
+</div>
+<div class="my-space-sm">
+<div class="font-currency-stat text-currency-stat text-on-surface tracking-tight">3 <span class="font-body-md text-body-md text-outline font-normal">accounts</span></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Amortization on track</span>
+<span class="font-data-mono text-outline bg-surface-container px-space-xs py-0.5 rounded">75% avg</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low p-space-lg shadow-md flex flex-col justify-between">
+<div class="absolute -right-8 -top-8 w-28 h-28 bg-secondary-container/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between text-outline">
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Fully Closed (Q3/Q4)</span>
+<span class="material-symbols-outlined text-[20px] text-secondary-fixed-dim">task_alt</span>
+</div>
+<div class="my-space-sm">
+<div class="font-currency-stat text-currency-stat text-on-surface tracking-tight">8 <span class="font-body-md text-body-md text-outline font-normal">cleared</span></div>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-on-surface-variant">$18,450 recovered</span>
+<span class="font-data-mono text-secondary bg-surface-container px-space-xs py-0.5 rounded">Zero Loss</span>
+</div>
+</div>
+</section>
+<!-- Filter & Tab Toolbar (Collapsed by default, toggleable) -->
+<div class="bg-surface-container-low p-space-md rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-space-sm" id="filter-drawer">
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-high text-primary font-body-sm text-body-sm font-medium">All Receivables (4)</button>
+<button class="px-space-md py-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface font-body-sm text-body-sm">Priority &gt; $1k (3)</button>
+<button class="px-space-md py-1.5 rounded-lg hover:bg-surface-container text-outline hover:text-on-surface font-body-sm text-body-sm">Overdue / Nearing Due (1)</button>
+</div>
+<div class="flex items-center gap-space-sm text-body-sm text-outline">
+<span class="font-label-caps text-label-caps uppercase">Sort by:</span>
+<select class="bg-surface-container text-on-surface rounded-lg px-space-sm py-1 font-body-sm focus:outline-none">
+<option>Remaining Balance (High-Low)</option>
+<option>Nearest Due Date</option>
+<option>Settlement Progress %</option>
+</select>
+</div>
+</div>
+<!-- Dynamic Split View: Debtors List + Real-time Repayment Amortizer Drawer -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-start">
+<!-- Active Credit Ledger Records (Left / Main Stream: 8 cols on xl) -->
+<section aria-label="Active Borrowers Ledger" class="xl:col-span-8 flex flex-col gap-space-md">
+<!-- Record Card 1: Marcus Vance -->
+<article class="bg-surface-container-low hover:bg-surface-container rounded-xl p-space-lg shadow-md transition-all flex flex-col gap-space-md group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Close-up professional portrait of Marcus Vance, a confident businessman in a tailored dark blue suit with warm ambient studio rim lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQYtAdIdNIjtV2oP8_b96O_9TUBh25oTGSEIlx8EKOcX24wrhpQ7Qpl29gZ1E-Y12HmUSIoGHullhRUUCprDrYvoVqNmw1LFAoaOs3-he3QzAs6OT-I4p4Ven9zFKAX72ZlgSd48zZ16UTLEoRCN_Eg-ofSgkdrHmh21r7GD_PnCqnQSrbeIqNat23Z5f48cuOLlLHotP4pa2iHkCE3w_WnLG6VNTx6fX-8s0u4SWQhCRl8FVlHOQ"/>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-secondary ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold">Marcus Vance</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-outline font-data-mono text-body-sm">Seed Syndication</span>
+</div>
+<span class="font-data-mono text-body-sm text-outline-variant truncate">m.vance@vancetech.io · +1 (415) 890-2194</span>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-label-caps text-label-caps uppercase text-outline">Remaining Receivable</span>
+<span class="font-currency-stat text-currency-stat text-on-surface tabular-nums font-bold">$1,200.00</span>
+<span class="font-data-mono text-body-sm text-outline">Orig. $3,000.00</span>
+</div>
+</div>
+<!-- Loan Meta Ribbon -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm p-space-sm rounded-lg bg-surface-container-lowest text-body-sm font-data-mono">
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Lent Date</span>
+<span class="text-on-surface">Aug 14, 2024</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Due Date</span>
+<span class="text-secondary font-semibold">Dec 15, 2024</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Principal Repaid</span>
+<span class="text-secondary tabular-nums">$1,800.00</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Instalments</span>
+<span class="text-on-surface">3 of 5 Cleared</span>
+</div>
+</div>
+<!-- Amortization Progress Bar -->
+<div class="flex flex-col gap-space-2xs">
+<div class="flex justify-between items-center text-body-sm">
+<span class="px-space-xs py-0.5 rounded-full bg-secondary/15 text-secondary font-data-mono font-medium text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+              60% Settled ($1,800 paid)
+            </span>
+<span class="font-body-sm text-body-sm text-outline">Last payment: $600.00 on Oct 20</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden relative">
+<div class="h-full bg-gradient-to-r from-primary via-secondary to-secondary-fixed rounded-full shadow-[0_0_12px_rgba(78,222,163,0.4)]" style="width: 60%"></div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<button class="h-9 px-space-md rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors" onclick="quickFillModal('Marcus Vance', '1200.00', 'Dec 15, 2024')">
+<span class="material-symbols-outlined text-[16px] text-secondary">payments</span>
+<span>Log Payment</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px] text-primary">forward_to_inbox</span>
+<span>Send Polite Reminder</span>
+</button>
+</div>
+<button class="h-9 px-space-sm rounded-lg bg-transparent hover:bg-surface-container text-outline hover:text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>Settlement Agreement</span>
+</button>
+</div>
+</article>
+<!-- Record Card 2: Elena Rostova -->
+<article class="bg-surface-container-low hover:bg-surface-container rounded-xl p-space-lg shadow-md transition-all flex flex-col gap-space-md group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait of Elena Rostova, a tech consultant in her 30s with sleek dark hair and architectural eyewear against an atmospheric dark office bokeh." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQTTbcC4_nOXN_mL4ALwV9_SNkTzz5o1_NBiaAjgRQ60chreWttERF8K8ypVBWUm80VNNZCbgVvLTH1AYN3qiD-nNDZksgxkUgnlWbZ9_uWi5qbBi-OPToO2ayADpn0zUXUFUqjkqoOeKrhKrATIWNw3TvZf0OPtRoyv4pBEjrd-oCYen1OSOWWzLQ6-8WwPWxtgqATcSzBKuhuRIcu_ytTZxclXowOy9bqs2qF_xRGLkfCGz69rQ"/>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-primary ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold">Elena Rostova</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-outline font-data-mono text-body-sm">Hardware Lease</span>
+</div>
+<span class="font-data-mono text-body-sm text-outline-variant truncate">elena.rostova@nexus.ch · +41 78 402 1109</span>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-label-caps text-label-caps uppercase text-outline">Remaining Receivable</span>
+<span class="font-currency-stat text-currency-stat text-on-surface tabular-nums font-bold">$2,400.00</span>
+<span class="font-data-mono text-body-sm text-outline">Orig. $4,000.00</span>
+</div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm p-space-sm rounded-lg bg-surface-container-lowest text-body-sm font-data-mono">
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Lent Date</span>
+<span class="text-on-surface">Sep 02, 2024</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Due Date</span>
+<span class="text-on-surface">Jan 10, 2025</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Principal Repaid</span>
+<span class="text-secondary tabular-nums">$1,600.00</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Instalments</span>
+<span class="text-on-surface">2 of 5 Cleared</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<div class="flex justify-between items-center text-body-sm">
+<span class="px-space-xs py-0.5 rounded-full bg-secondary/15 text-secondary font-data-mono font-medium text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+              40% Settled ($1,600 paid)
+            </span>
+<span class="font-body-sm text-body-sm text-outline">Last payment: $800.00 on Nov 04</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary via-secondary to-secondary-fixed rounded-full shadow-[0_0_12px_rgba(78,222,163,0.3)]" style="width: 40%"></div>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<button class="h-9 px-space-md rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors" onclick="quickFillModal('Elena Rostova', '2400.00', 'Jan 10, 2025')">
+<span class="material-symbols-outlined text-[16px] text-secondary">payments</span>
+<span>Log Payment</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px] text-primary">forward_to_inbox</span>
+<span>Send Polite Reminder</span>
+</button>
+</div>
+<button class="h-9 px-space-sm rounded-lg bg-transparent hover:bg-surface-container text-outline hover:text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>Settlement Agreement</span>
+</button>
+</div>
+</article>
+<!-- Record Card 3: David Kalu -->
+<article class="bg-surface-container-low hover:bg-surface-container rounded-xl p-space-lg shadow-md transition-all flex flex-col gap-space-md group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="Portrait photo of David Kalu, smiling creative director wearing charcoal turtleneck with sharp specular lighting and deep navy background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOplqHiKcY548VTbA_qZc9-emjhCrYKW0duwDLfhAXej33keLFVoS9spJ7Zyb6Oo9ymFXqaajeReRF909mCrWHw7GSrxzpL4dI4R__BLQj9oUODdq_yySYKnW4GNO6dL_e48uTuMdlr-R2v8D7S4zqTJqp5hBzrb2uRjs7K3SxTp67UBW7OvI75KjxOyZrGS8mUNVOyuMPhaezp_8yKV1p9qoIjVxJgJFdwDBqLuV1veyGqF0XG2k"/>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-tertiary-container ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold">David Kalu</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-outline font-data-mono text-body-sm">Design Retainer Bridge</span>
+</div>
+<span class="font-data-mono text-body-sm text-outline-variant truncate">david@kalu.studio · +44 20 7946 0912</span>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-label-caps text-label-caps uppercase text-tertiary">Overdue Target</span>
+<span class="font-currency-stat text-currency-stat text-tertiary tabular-nums font-bold">$1,800.00</span>
+<span class="font-data-mono text-body-sm text-outline">Orig. $2,500.00</span>
+</div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm p-space-sm rounded-lg bg-surface-container-lowest text-body-sm font-data-mono">
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Lent Date</span>
+<span class="text-on-surface">Jun 11, 2024</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Due Date</span>
+<span class="text-tertiary font-semibold">Nov 01, 2024 (Late)</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Principal Repaid</span>
+<span class="text-secondary tabular-nums">$700.00</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Status</span>
+<span class="text-tertiary">Grace Period Extended</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<div class="flex justify-between items-center text-body-sm">
+<span class="px-space-xs py-0.5 rounded-full bg-tertiary-container/20 text-tertiary font-data-mono font-medium text-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+              28% Settled ($700 paid)
+            </span>
+<span class="font-body-sm text-body-sm text-outline">Last payment: $250.00 on Sep 18</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full shadow-[0_0_10px_rgba(255,81,106,0.3)]" style="width: 28%"></div>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<button class="h-9 px-space-md rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors" onclick="quickFillModal('David Kalu', '1800.00', 'Immediately')">
+<span class="material-symbols-outlined text-[16px] text-secondary">payments</span>
+<span>Log Payment</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-tertiary-container/20 hover:bg-tertiary-container/30 text-tertiary font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+<span>Send Urgent Ping (SMS)</span>
+</button>
+</div>
+<button class="h-9 px-space-sm rounded-lg bg-transparent hover:bg-surface-container text-outline hover:text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px]">history_edu</span>
+<span>Renegotiate Term</span>
+</button>
+</div>
+</article>
+<!-- Record Card 4: Claire Dupont -->
+<article class="bg-surface-container-low hover:bg-surface-container rounded-xl p-space-lg shadow-md transition-all flex flex-col gap-space-md group">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-md">
+<div class="relative">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center font-headline-sm text-on-surface">CD</div>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-secondary ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate font-semibold">Claire Dupont</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-outline font-data-mono text-body-sm">Personal Loan</span>
+</div>
+<span class="font-data-mono text-body-sm text-outline-variant truncate">c.dupont@atelier-paris.fr · +33 6 55 91 22 04</span>
+</div>
+</div>
+<div class="flex flex-col sm:items-end">
+<span class="font-label-caps text-label-caps uppercase text-outline">Remaining Receivable</span>
+<span class="font-currency-stat text-currency-stat text-on-surface tabular-nums font-bold">$1,400.00</span>
+<span class="font-data-mono text-body-sm text-outline">Orig. $1,400.00</span>
+</div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-sm p-space-sm rounded-lg bg-surface-container-lowest text-body-sm font-data-mono">
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Lent Date</span>
+<span class="text-on-surface">Oct 28, 2024</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Due Date</span>
+<span class="text-on-surface">Dec 31, 2024</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Principal Repaid</span>
+<span class="text-outline tabular-nums">$0.00</span>
+</div>
+<div>
+<span class="block text-outline text-[11px] uppercase font-label-caps">Terms</span>
+<span class="text-on-surface">Bullet Repayment</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-2xs">
+<div class="flex justify-between items-center text-body-sm">
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-data-mono font-medium text-body-sm">
+              0% Settled (Awaiting First Maturity)
+            </span>
+<span class="font-body-sm text-body-sm text-outline">Initiated 14 days ago</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full" style="width: 2%"></div>
+</div>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-xs">
+<div class="flex items-center gap-space-xs">
+<button class="h-9 px-space-md rounded-lg bg-surface-container-high hover:bg-surface-bright text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors" onclick="quickFillModal('Claire Dupont', '1400.00', 'Dec 31, 2024')">
+<span class="material-symbols-outlined text-[16px] text-secondary">payments</span>
+<span>Log Payment</span>
+</button>
+<button class="h-9 px-space-md rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px] text-primary">forward_to_inbox</span>
+<span>Send Gentle Reminder</span>
+</button>
+</div>
+<button class="h-9 px-space-sm rounded-lg bg-transparent hover:bg-surface-container text-outline hover:text-on-surface font-body-sm text-body-sm flex items-center gap-space-2xs transition-colors">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>Settlement Agreement</span>
+</button>
+</div>
+</article>
+</section>
+<!-- Right Side: Persistent Interactive Modal/Form Dock (4 cols on xl) -->
+<aside aria-label="Credit Settlement Console" class="xl:col-span-4 flex flex-col gap-space-md sticky top-20">
+<!-- Live Settlement Control Panel (Open Interactive Modal / Card) -->
+<div class="bg-surface-container-low rounded-xl p-space-lg shadow-xl relative overflow-hidden flex flex-col gap-space-md" id="settlement-modal-card">
+<!-- Specular radial flare -->
+<div class="absolute -top-16 -right-16 w-44 h-44 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+<!-- Header -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Record Credit / Settlement</h2>
+</div>
+<span class="font-label-caps text-label-caps uppercase text-outline bg-surface-container px-space-xs py-0.5 rounded">Terminal Mode</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Update counterparty debt milestones or execute a lump-sum settlement deposit into treasury.</p>
+<!-- Form Fields -->
+<form class="flex flex-col gap-space-sm pt-space-xs" id="credit-form" onsubmit="event.preventDefault(); submitLedgerEntry();">
+<!-- Field 1: Counterparty Selection -->
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps uppercase text-outline" for="borrower-name">Counterparty / Debtor</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-space-sm top-2.5 text-outline text-[18px]">person</span>
+<input class="w-full h-10 pl-9 pr- space-sm bg-surface-container-lowest rounded-lg text-on-surface font-body-md text-body-md placeholder:text-outline focus:ring-1 focus:ring-primary focus:outline-none" id="borrower-name" placeholder="Enter contact or name" type="text" value="Marcus Vance"/>
+</div>
+</div>
+<!-- Field 2: Total Principal vs Remaining -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps uppercase text-outline" for="principal-lent">Principal Lent ($)</label>
+<input class="w-full h-10 px-space-sm bg-surface-container-lowest rounded-lg text-on-surface font-data-mono text-body-md focus:ring-1 focus:ring-primary focus:outline-none tabular-nums" id="principal-lent" type="text" value="3,000.00"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps uppercase text-outline" for="due-date">Agreed Maturity</label>
+<input class="w-full h-10 px-space-sm bg-surface-container-lowest rounded-lg text-on-surface font-data-mono text-body-md focus:ring-1 focus:ring-primary focus:outline-none" id="due-date" type="text" value="2024-12-15"/>
+</div>
+</div>
+<!-- Field 3: Amount Collected Today -->
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<label class="font-label-caps text-label-caps uppercase text-secondary" for="collected-today">Amount Collected Today ($)</label>
+<span class="text-[11px] font-data-mono text-outline">Quick: <button class="underline hover:text-secondary" onclick="document.getElementById('collected-today').value='600.00'" type="button">$600</button> | <button class="underline hover:text-secondary" onclick="document.getElementById('collected-today').value='1200.00'" type="button">Full $1.2k</button></span>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-space-sm top-2.5 text-secondary text-[18px]">add_task</span>
+<input class="w-full h-10 pl-9 pr-space-sm bg-surface-container-lowest rounded-lg text-secondary font-currency-stat text-body-lg focus:ring-1 focus:ring-secondary focus:outline-none tabular-nums font-semibold" id="collected-today" placeholder="0.00" type="text" value="600.00"/>
+</div>
+</div>
+<!-- Field 4: Destination Account -->
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps uppercase text-outline" for="target-account">Target Treasury Account</label>
+<select class="w-full h-10 px-space-sm bg-surface-container-lowest rounded-lg text-on-surface font-body-sm text-body-sm focus:ring-1 focus:ring-primary focus:outline-none" id="target-account">
+<option>JPMorgan Chase Core Cash (••4891) - Inflow</option>
+<option>Mercury Reserve Treasury (••2004) - USD</option>
+<option>Cold Vault Hardware Settlement (Ledger X)</option>
+</select>
+</div>
+<!-- Field 5: Notes & Verification Reference -->
+<div class="flex flex-col gap-1">
+<label class="font-label-caps text-label-caps uppercase text-outline" for="payment-notes">Notes &amp; Transfer Reference</label>
+<textarea class="w-full p-space-sm bg-surface-container-lowest rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:ring-1 focus:ring-primary focus:outline-none resize-none" id="payment-notes" placeholder="Wire ref, Wire confirmation code, or repayment notes..." rows="2">Wire Ref #TX-8910-FEDWIRE Received via online banking</textarea>
+</div>
+<!-- Verification Attachment Pill -->
+<div class="flex items-center justify-between p-space-xs px-space-sm rounded-lg bg-surface-container text-body-sm font-data-mono text-outline">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-secondary">attachment</span>
+<span class="truncate max-w-[170px] text-on-surface">rec_slip_vance_oct24.pdf</span>
+</div>
+<button class="text-tertiary hover:underline text-[12px]" type="button">Remove</button>
+</div>
+<!-- Dynamic Calculation Breakdown -->
+<div class="p-space-sm rounded-lg bg-surface-container text-body-sm flex flex-col gap-1">
+<div class="flex justify-between text-outline">
+<span>Current Outstanding:</span>
+<span class="font-data-mono text-on-surface tabular-nums">$1,200.00</span>
+</div>
+<div class="flex justify-between text-secondary">
+<span>Deduction (Collected Today):</span>
+<span class="font-data-mono tabular-nums">- $600.00</span>
+</div>
+<div class="h-[1px] bg-surface-container-highest my-1"></div>
+<div class="flex justify-between font-semibold text-on-surface">
+<span>Projected Balance Post-Entry:</span>
+<span class="font-data-mono text-primary tabular-nums">$600.00</span>
+</div>
+</div>
+<!-- Modal Action Buttons -->
+<div class="flex items-center justify-between gap-space-sm mt-space-xs">
+<button class="h-10 px-space-md rounded-lg bg-surface-container hover:bg-surface-bright text-outline hover:text-on-surface font-body-md text-body-md transition-colors" onclick="clearForm()" type="button">
+              Reset
+            </button>
+<button class="flex-1 h-10 px-space-md rounded-lg bg-secondary hover:bg-secondary-fixed text-on-secondary font-headline-sm text-body-md font-semibold flex items-center justify-center gap-space-xs shadow-[0_0_16px_rgba(78,222,163,0.3)] transition-all" type="submit">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Update Credit Record</span>
+</button>
+</div>
+</form>
+<!-- Notification Toast inside modal for feedback -->
+<div class="hidden absolute inset-x-space-md bottom-space-md p-space-sm rounded-lg bg-secondary text-on-secondary flex items-center justify-between shadow-2xl transition-all" id="settlement-toast">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px]">task_alt</span>
+<span class="font-headline-sm text-body-sm font-semibold">Ledger &amp; Treasury Updated!</span>
+</div>
+<span class="font-data-mono text-[11px] opacity-80">Synced</span>
+</div>
+</div>
+<!-- Historical Settlements Mini-Feed -->
+<div class="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-outline">Settled This Month</span>
+<span class="font-data-mono text-[11px] text-secondary">2 Cleared</span>
+</div>
+<div class="flex flex-col gap-space-xs text-body-sm font-body-sm">
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px]">check</span>
+<span class="text-on-surface font-medium">Liam Thorne</span>
+</div>
+<span class="font-data-mono text-secondary tabular-nums font-semibold">+$800.00</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[16px]">check</span>
+<span class="text-on-surface font-medium">Sophia Chen</span>
+</div>
+<span class="font-data-mono text-secondary tabular-nums font-semibold">+$600.00</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- Interactive JavaScript -->
+<script>
+    function quickFillModal(name, remaining, dueDate) {
+      document.getElementById('borrower-name').value = name;
+      document.getElementById('due-date').value = dueDate;
+      document.getElementById('collected-today').value = (parseFloat(remaining.replace(',', '')) / 2).toFixed(2);
+      
+      const modal = document.getElementById('settlement-modal-card');
+      modal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      modal.classList.add('ring-2', 'ring-primary');
+      setTimeout(() => modal.classList.remove('ring-2', 'ring-primary'), 1200);
+    }
+
+    function clearForm() {
+      document.getElementById('credit-form').reset();
+    }
+
+    function submitLedgerEntry() {
+      const toast = document.getElementById('settlement-toast');
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    document.getElementById('open-modal-btn').addEventListener('click', () => {
+      document.getElementById('borrower-name').value = 'New Counterparty';
+      document.getElementById('principal-lent').value = '1,000.00';
+      document.getElementById('collected-today').value = '0.00';
+      document.getElementById('borrower-name').focus();
+    });
+  </script>
+</div></div></main></div></body></html>

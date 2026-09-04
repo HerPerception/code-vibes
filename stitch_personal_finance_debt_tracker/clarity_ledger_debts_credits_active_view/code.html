@@ -1,0 +1,196 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"><title>Clarity Money</title><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#f8f9ff;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"tertiary-fixed-dim":"#ffb3b6","secondary-fixed-dim":"#68dba9","surface-container-lowest":"#ffffff","outline":"#74777b","inverse-primary":"#bfc7d1","tertiary-fixed":"#ffdada","on-tertiary-container":"#f83256","background":"#f8f9ff","secondary":"#006c4a","on-primary-fixed":"#141c24","on-secondary-fixed":"#002114","on-tertiary-fixed-variant":"#920028","surface-container-low":"#eff4ff","tertiary-container":"#40000c","primary-fixed-dim":"#bfc7d1","error":"#ba1a1a","surface":"#f8f9ff","outline-variant":"#c4c6cb","surface-container-high":"#dce9ff","on-error":"#ffffff","on-surface-variant":"#44474b","surface-container":"#e5eeff","on-primary-fixed-variant":"#404850","surface-dim":"#cbdbf5","primary-container":"#141c24","on-surface":"#0b1c30","surface-bright":"#f8f9ff","surface-variant":"#d3e4fe","on-secondary-fixed-variant":"#005137","error-container":"#ffdad6","secondary-fixed":"#85f8c4","surface-tint":"#575f68","inverse-surface":"#213145","primary-fixed":"#dbe3ed","tertiary":"#000000","on-secondary":"#ffffff","on-tertiary-fixed":"#40000c","on-primary-container":"#7d858e","on-background":"#0b1c30","on-error-container":"#93000a","inverse-on-surface":"#eaf1ff","on-tertiary":"#ffffff","primary":"#000000","secondary-container":"#82f5c1","on-primary":"#ffffff","on-secondary-container":"#00714e","surface-container-highest":"#d3e4fe"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-md":"1rem","space-sm":"0.75rem","gutter-mobile":"0.75rem","space-3xl":"2.5rem","margin-screen":"1.25rem","space-xs":"0.5rem","space-2xs":"0.25rem","space-lg":"1.25rem","space-xl":"1.5rem","space-2xl":"2rem"},"fontFamily":{"headline-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-hero-mobile":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"currency-stat":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"display-hero":["Plus Jakarta Sans"]},"fontSize":{"headline-sm":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-lg":["26px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"700"}],"display-hero-mobile":["32px",{"lineHeight":"38px","letterSpacing":"-0.025em","fontWeight":"800"}],"label-lg":["15px",{"lineHeight":"20px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"400"}],"currency-stat":["24px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"400"}],"headline-md":["20px",{"lineHeight":"26px","letterSpacing":"-0.015em","fontWeight":"600"}],"display-hero":["38px",{"lineHeight":"44px","letterSpacing":"-0.03em","fontWeight":"800"}]}}}};</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface font-body text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-16 px-margin-screen flex items-center justify-between"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container"><span class="material-symbols-outlined text-[20px]">account_balance_wallet</span></div><span class="text-headline-sm font-headline-sm text-on-surface tracking-tight">Clarity Money</span></div><div class="flex items-center gap-space-xs"><button aria-label="Settings and preferences" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">tune</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface min-h-screen"><div class="flex flex-col w-full px-margin-screen pb-space-3xl gap-space-lg">
+<!-- Friendly Greeting & Sparkline Header -->
+<div class="flex items-center justify-between pt-space-xs">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Good afternoon, Alex</span>
+<span class="font-headline-md text-headline-md text-on-surface">Financial Snapshot</span>
+</div>
+<div class="flex items-center gap-space-2xs bg-surface-container px-space-sm py-1 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface">Live Synced</span>
+</div>
+</div>
+<!-- 1. Top Total Balance Card -->
+<div class="relative overflow-hidden bg-secondary text-on-secondary rounded-[28px] p-space-xl shadow-lg transition-transform active:scale-[0.99] duration-150">
+<!-- Ambient organic glow effects inside card -->
+<div class="absolute -right-8 -top-8 w-40 h-40 bg-secondary-container/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="absolute -left-10 -bottom-10 w-36 h-36 bg-secondary-fixed/15 rounded-full blur-xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary-container text-[20px]">format_image_left</span>
+<span class="font-label-md text-label-md text-secondary-fixed opacity-90">My Total Balance</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-white/10 text-on-secondary backdrop-blur-sm">
+<span class="material-symbols-outlined text-[14px]">bolt</span> Available Funds
+        </span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-baseline gap-1">
+<span class="font-display-hero-mobile text-display-hero-mobile tracking-tight">$4,250.00</span>
+</div>
+<div class="flex items-center gap-space-xs mt-1">
+<div class="flex items-center text-secondary-container font-label-sm text-label-sm bg-white/10 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span class="ml-0.5">+14.2%</span>
+</div>
+<span class="font-body-sm text-body-sm text-secondary-fixed-dim">vs last month ($3,720)</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs text-secondary-fixed opacity-80">
+<span class="font-body-sm text-body-sm">Updated Just Now</span>
+<div class="flex items-center gap-1">
+<span class="font-label-sm text-label-sm text-on-secondary">Safe to spend: $1,430</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. Side-by-Side Dual Action & Tracking Sections -->
+<div class="grid grid-cols-2 gap-space-sm w-full">
+<!-- Column 1: Money In / Who Owes Me -->
+<div class="bg-secondary-container/20 rounded-2xl p-space-md flex flex-col justify-between shadow-sm hover:shadow transition-shadow">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<div class="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-bold px-1.5 py-0.5 rounded bg-secondary-container/40">Income</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2 line-clamp-1">Earned Income</span>
+<span class="font-currency-stat text-currency-stat text-secondary tracking-tight">+$1,850.00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant/80">Salary &amp; Sales</span>
+</div>
+<button aria-label="Log earned income" class="mt-space-md w-full h-11 bg-secondary text-on-secondary rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all font-label-md text-label-md" id="btn-money-in" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="">Log Income</span>
+</button>
+</div>
+<!-- Column 2: Money Out / I Owe -->
+<div class="bg-error-container/30 rounded-2xl p-space-md flex flex-col justify-between shadow-sm hover:shadow transition-shadow">
+<div class="flex flex-col gap-space-2xs">
+<div class="flex items-center justify-between">
+<div class="w-7 h-7 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+</div>
+<span class="font-label-sm text-label-sm text-error font-bold px-1.5 py-0.5 rounded bg-error-container/70">Expenses</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2 line-clamp-1">Money Out / Spent</span>
+<span class="font-currency-stat text-currency-stat text-error tracking-tight">-$620.00</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant/80">Food, bills &amp; rent</span>
+</div>
+<button aria-label="Log an expense" class="mt-space-md w-full h-11 bg-error text-on-error rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all font-label-md text-label-md" id="btn-money-out" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+<span class="">Log Expense</span>
+</button>
+</div>
+</div>
+<!-- Micro-Banner for Social Splits / Clarity Tip -->
+<div class="bg-surface-container-low rounded-2xl p-space-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center shrink-0 text-on-surface">
+<span class="material-symbols-outlined text-[20px]">group</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate">Shared Tab with Julian</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">You paid for dinner; $45.00 pending</span>
+</div>
+</div>
+<button class="shrink-0 font-label-sm text-label-sm bg-surface-container-highest text-on-surface px-space-sm py-1.5 rounded-full hover:bg-surface-container-high transition-colors" type="button">
+      Remind
+    </button>
+</div><div class="w-full bg-surface-container p-1 rounded-2xl flex items-center gap-1 shadow-sm"><button class="flex-1 py-2 px-3 rounded-xl font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all text-on-surface-variant hover:text-on-surface" id="tab-activity" type="button"><span class="material-symbols-outlined text-[18px]">list_alt</span><span class="">Activity Log</span></button><button class="flex-1 py-2 px-3 rounded-xl font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all bg-surface-container-lowest text-on-surface shadow-sm font-bold" id="tab-debts" type="button"><span class="material-symbols-outlined text-[18px]">swap_horizontal_circle</span><span class="">Debts &amp; Credits</span></button></div>
+<!-- 3. "Recent Activity" Ledger List -->
+<div class="flex flex-col gap-space-md" id="panel-debts"><div class="flex items-center justify-between px-space-2xs"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-on-surface">Debts &amp; Credits</span><span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded-full">Personal IOUs (Peer Balances)</span></div><span class="font-label-sm text-label-sm text-secondary font-bold">Net Balance: +$255.00</span></div><div class="grid grid-cols-2 gap-space-sm w-full"><!-- Left Column: Money Owed to Me (Credits) --><div class="bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm flex flex-col justify-between gap-space-sm"><div class="flex flex-col gap-space-xs"><div class="flex items-center justify-between pb-1 border-b border-surface-container"><div class="flex items-center gap-1 min-w-0"><span class="material-symbols-outlined text-secondary text-[16px]">call_received</span><span class="font-label-md text-label-md text-on-surface font-bold truncate">Owed to Me</span></div><span class="font-label-sm text-label-sm text-secondary bg-secondary-container/40 px-1.5 py-0.2 rounded font-bold">Income</span></div><div class="flex flex-col gap-1"><!-- Row 1: Sarah Lin --><div class="flex flex-col p-1.5 rounded-xl hover:bg-surface-container-low transition-colors"><div class="flex items-center justify-between"><div class="flex items-center gap-1.5 min-w-0"><div class="w-6 h-6 rounded-full bg-secondary-container/40 text-secondary flex items-center justify-center shrink-0">Income</div><span class="font-label-md text-label-md text-on-surface truncate font-bold">Sarah Lin</span></div><span class="font-label-md text-label-md text-secondary font-bold">+$120.00</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate pl-7">Oct 24 • Concert tickets</span></div><!-- Row 2: Alex Wong --><div class="flex flex-col p-1.5 rounded-xl hover:bg-surface-container-low transition-colors"><div class="flex items-center justify-between"><div class="flex items-center gap-1.5 min-w-0"><div class="w-6 h-6 rounded-full bg-secondary-container/40 text-secondary flex items-center justify-center shrink-0">Income</div><span class="font-label-md text-label-md text-on-surface truncate font-bold">Alex Wong</span></div><span class="font-label-md text-label-md text-secondary font-bold">+$80.00</span></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate pl-7">Oct 18 • Dinner split</span></div><!-- Row 3: Maya Chen --><div class="flex flex-col p-1.5 rounded-xl hover:bg-surface-container-low transition-colors"><div class="flex items-center justify-between"><div class="flex items-center gap-1.5 min-w-0"><div class="w-6 h-6 rounded-full bg-secondary-container/40 text-secondary flex items-center justify-center shrink-0">Income</div><span class="font-label-md text-label-md text-on-surface truncate font-bold">Maya Chen</span></div><span class="font-label-md text-label-md text-secondary font-bold">+$250.00</span></div><div class="flex items-center justify-between pl-7 pr-0.5 mt-0.5 min-w-0"><span class="font-body-sm text-body-sm text-on-surface-variant truncate">Oct 12 • Airbnb deposit</span><span class="shrink-0 inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-bold tracking-tight bg-amber-100/70 text-amber-800 border border-amber-300/60">Overdue</span></div></div></div></div><div class="flex items-center justify-between pt-1 border-t border-surface-container"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Credits</span><span class="font-label-sm text-label-sm text-secondary bg-secondary-container/30 px-2 py-0.5 rounded-full font-bold">Total: +$450.00</span></div></div><!-- Right Column: Money I Owe (Debits) --><div class="bg-surface-container-lowest rounded-2xl p-space-sm shadow-sm flex flex-col justify-between gap-space-sm"><div class="flex flex-col gap-space-xs"><div class="flex items-center justify-between pb-1 border-b border-surface-container"><div class="flex items-center gap-1 min-w-0"><span class="material-symbols-outlined text-error text-[16px]">call_made</span><span class="font-label-md text-label-md text-on-surface font-bold truncate">Money I Owe</span></div><span class="font-label-sm text-label-sm text-error bg-error-container/40 px-1.5 py-0.2 rounded font-bold">2 items</span></div><div class="flex flex-col gap-1"><!-- Row 1: Julian Vance --><div class="flex flex-col p-1.5 rounded-xl hover:bg-surface-container-low transition-colors"><div class="flex items-center justify-between"><div class="flex items-center gap-1.5 min-w-0"><div class="w-6 h-6 rounded-full bg-error-container/40 text-error flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[14px]">person</span></div><span class="font-label-md text-label-md text-on-surface truncate font-bold">Julian Vance</span></div><div class="flex items-center gap-1 shrink-0"><span class="font-label-md text-label-md text-error font-bold">-$45.00</span><button aria-label="Settle debt with Julian Vance" class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary-container/40 transition-colors" type="button">Personal IOUs (Peer Balances)</button></div></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate pl-7">Oct 26 • Weekend trip</span></div><!-- Row 2: Marcus Brody --><div class="flex flex-col p-1.5 rounded-xl hover:bg-surface-container-low transition-colors"><div class="flex items-center justify-between"><div class="flex items-center gap-1.5 min-w-0"><div class="w-6 h-6 rounded-full bg-error-container/40 text-error flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[14px]">person</span></div><span class="font-label-md text-label-md text-on-surface truncate font-bold">Marcus Brody</span></div><div class="flex items-center gap-1 shrink-0"><span class="font-label-md text-label-md text-error font-bold">-$150.00</span><button aria-label="Settle debt with Marcus Brody" class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary-container/40 transition-colors" type="button">Personal IOUs (Peer Balances)</button></div></div><span class="font-body-sm text-body-sm text-on-surface-variant truncate pl-7">Due Nov 02 • Equipment loan</span></div></div></div><div class="flex items-center justify-between pt-1 border-t border-surface-container"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Debits</span><span class="font-label-sm text-label-sm text-error bg-error-container/30 px-2 py-0.5 rounded-full font-bold">Total: -$195.00</span></div></div></div></div>
+<!-- Interactive Modal / Quick Log Sheet (Hidden by default, triggered via buttons) -->
+<script>(function(){const tabAct=document.getElementById('tab-activity');const tabDeb=document.getElementById('tab-debts');const pnlAct=document.getElementById('panel-activity');const pnlDeb=document.getElementById('panel-debts');if(!tabAct||!tabDeb||!pnlAct||!pnlDeb)return;function showActivity(){pnlAct.classList.remove('hidden');pnlAct.classList.add('flex');pnlDeb.classList.add('hidden');pnlDeb.classList.remove('flex');tabAct.className='flex-1 py-2 px-3 rounded-xl font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all bg-surface-container-lowest text-on-surface shadow-sm font-bold';tabDeb.className='flex-1 py-2 px-3 rounded-xl font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all text-on-surface-variant hover:text-on-surface';}function showDebts(){pnlDeb.classList.remove('hidden');pnlDeb.classList.add('flex');pnlAct.classList.add('hidden');pnlAct.classList.remove('flex');tabDeb.className='flex-1 py-2 px-3 rounded-xl font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all bg-surface-container-lowest text-on-surface shadow-sm font-bold';tabAct.className='flex-1 py-2 px-3 rounded-xl font-label-md text-label-md flex items-center justify-center gap-1.5 transition-all text-on-surface-variant hover:text-on-surface';}tabAct.addEventListener('click',showActivity);tabDeb.addEventListener('click',showDebts);})();</script><div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-end justify-center px-margin-screen pb-safe" id="quick-action-dialog">
+<div class="bg-surface-container-lowest w-full max-w-md rounded-t-3xl p-space-xl flex flex-col gap-space-md shadow-2xl animate-in slide-in-from-bottom duration-200">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<div class="w-3 h-3 rounded-full bg-secondary" id="modal-indicator"></div>
+<span class="font-headline-sm text-headline-sm text-on-surface" id="modal-title">Log Entry</span>
+</div>
+<button class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant" id="modal-close" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface-variant" for="amount-input">Amount</label>
+<div class="relative flex items-center">
+<span class="absolute left-space-md font-headline-lg text-headline-lg text-on-surface-variant">$</span>
+<input class="w-full h-14 pl-10 pr-space-md bg-surface-container-low rounded-xl font-headline-lg text-headline-lg text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" id="amount-input" placeholder="0.00" step="0.01" type="number">
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-md text-label-md text-on-surface-variant" for="person-input">Counterparty or Note</label>
+<input class="w-full h-12 px-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary transition-all" id="person-input" placeholder="e.g. Mia Chen or Grocery" type="text">
+</div>
+<div class="flex items-center gap-space-sm pt-space-xs">
+<button class="flex-1 h-12 bg-primary text-on-primary rounded-xl font-label-lg text-label-lg flex items-center justify-center shadow-md active:scale-98 transition-transform" id="modal-submit" type="button">
+          Confirm Entry
+        </button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const dialog = document.getElementById('quick-action-dialog');
+    const modalTitle = document.getElementById('modal-title');
+    const modalIndicator = document.getElementById('modal-indicator');
+    const btnIn = document.getElementById('btn-money-in');
+    const btnOut = document.getElementById('btn-money-out');
+    const btnClose = document.getElementById('modal-close');
+    const btnSubmit = document.getElementById('modal-submit');
+    const amountInput = document.getElementById('amount-input');
+    const personInput = document.getElementById('person-input');
+
+    function openModal(mode) {
+      if (mode === 'in') {
+        modalTitle.textContent = 'Log Money In / Who Owes';
+        modalIndicator.className = 'w-3 h-3 rounded-full bg-secondary';
+        btnSubmit.className = 'flex-1 h-12 bg-secondary text-on-secondary rounded-xl font-label-lg text-label-lg flex items-center justify-center shadow-md active:scale-98 transition-transform';
+      } else {
+        modalTitle.textContent = 'Log Money Out / I Owe';
+        modalIndicator.className = 'w-3 h-3 rounded-full bg-error';
+        btnSubmit.className = 'flex-1 h-12 bg-error text-on-error rounded-xl font-label-lg text-label-lg flex items-center justify-center shadow-md active:scale-98 transition-transform';
+      }
+      dialog.classList.remove('hidden');
+      dialog.classList.add('flex');
+      amountInput.focus();
+    }
+
+    function closeModal() {
+      dialog.classList.add('hidden');
+      dialog.classList.remove('flex');
+      amountInput.value = '';
+      personInput.value = '';
+    }
+
+    btnIn.addEventListener('click', () => openModal('in'));
+    btnOut.addEventListener('click', () => openModal('out'));
+    btnClose.addEventListener('click', closeModal);
+
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) closeModal();
+    });
+
+    btnSubmit.addEventListener('click', () => {
+      if (!amountInput.value) {
+        amountInput.classList.add('ring-2', 'ring-error');
+        setTimeout(() => amountInput.classList.remove('ring-2', 'ring-error'), 1200);
+        return;
+      }
+      closeModal();
+    });
+  })();
+</script></main>
+
+
+
+</body></html>
