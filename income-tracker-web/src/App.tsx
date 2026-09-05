@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import "./App.css";
 
@@ -108,6 +108,287 @@ type ModalType =
   | "income"
   | "expense"
   | null;
+
+/* ============================================================
+   Cash-flow chart (income vs expenses over time)
+   ============================================================ */
+
+function compactMoney(amount: number) {
+  const abs = Math.abs(amount);
+
+  if (abs >= 1_000_000) {
+    return `₦${(amount / 1_000_000).toFixed(abs >= 10_000_000 ? 0 : 1)}m`;
+  }
+
+  if (abs >= 1_000) {
+    return `₦${Math.round(amount / 1_000)}k`;
+  }
+
+  return `₦${Math.round(amount)}`;
+}
+
+function monthKeyLabel(key: string) {
+  const [year, month] = key.split("-").map(Number);
+  const label = new Date(year, month - 1, 1).toLocaleDateString("en-NG", {
+    month: "short",
+  });
+
+  return month === 1 ? `${label} '${String(year).slice(2)}` : label;
+}
+
+function shiftMonth(key: string, delta: number) {
+  const [year, month] = key.split("-").map(Number);
+  const date = new Date(year, month - 1 + delta, 1);
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function niceCeil(value: number) {
+  if (value <= 0) {
+    return 1;
+  }
+
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  const normalized = value / magnitude;
+  const factor =
+    normalized <= 1
+      ? 1
+      : normalized <= 2
+        ? 2
+        : normalized <= 2.5
+          ? 2.5
+          : normalized <= 5
+            ? 5
+            : 10;
+
+  return factor * magnitude;
+}
+
+type FlowPoint = {
+  month: string;
+  income: number;
+  expense: number;
+};
+
+const FLOW_HEIGHT = 240;
+const FLOW_PAD = { top: 18, right: 18, bottom: 30, left: 58 };
+
+function CashFlowChart({
+  income,
+  expenses,
+}: {
+  income: Income[];
+  expenses: Expense[];
+}) {
+  const [width, setWidth] = useState(0);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = boxRef.current;
+
+    if (!el) {
+      return;
+    }
+
+    const measure = () => setWidth(el.clientWidth);
+    const observer = new ResizeObserver(measure);
+
+    observer.observe(el);
+    measure();
+
+    return () => observer.disconnect();
+  }, []);
+
+  const points = useMemo<FlowPoint[]>(() => {
+    const sums = new Map<string, FlowPoint>();
+
+    const add = (isoDate: string, amount: number, kind: "income" | "expense") => {
+      const month = isoDate.slice(0, 7);
+      const entry = sums.get(month) ?? { month, income: 0, expense: 0 };
+
+      entry[kind] += amount;
+      sums.set(month, entry);
+    };
+
+    income.forEach((item) =>
+      add(item.date_received, Number(item.amount), "income")
+    );
+    expenses.forEach((item) => add(item.date, Number(item.amount), "expense"));
+
+    const sorted = [...sums.values()].sort((a, b) =>
+      a.month.localeCompare(b.month)
+    );
+
+    if (sorted.length === 0) {
+      return [];
+    }
+
+    const byKey = new Map(sorted.map((point) => [point.month, point]));
+    const filled: FlowPoint[] = [];
+    let cursor = sorted[0].month;
+    const last = sorted[sorted.length - 1].month;
+
+    while (cursor <= last) {
+      filled.push(byKey.get(cursor) ?? { month: cursor, income: 0, expense: 0 });
+
+      if (cursor === last) {
+        break;
+      }
+
+      cursor = shiftMonth(cursor, 1);
+    }
+
+    return filled;
+  }, [income, expenses]);
+
+  if (points.length === 0) {
+    return (
+      <div ref={boxRef}>
+        <p className="empty">
+          Record income or expenses to see your cash flow over time.
+        </p>
+      </div>
+    );
+  }
+
+  const innerWidth = Math.max(0, width - FLOW_PAD.left - FLOW_PAD.right);
+  const innerHeight = FLOW_HEIGHT - FLOW_PAD.top - FLOW_PAD.bottom;
+  const maxValue = niceCeil(
+    Math.max(0.01, ...points.flatMap((point) => [point.income, point.expense]))
+  );
+
+  const xStep = points.length > 1 ? innerWidth / (points.length - 1) : innerWidth;
+  const xAt = (index: number) => FLOW_PAD.left + index * xStep;
+  const yAt = (value: number) =>
+    FLOW_PAD.top + innerHeight - (value / maxValue) * innerHeight;
+
+  const seriesPoints = (key: "income" | "expense") =>
+    points.map((point) => yAt(point[key]).toFixed(1));
+
+  const linePath = (values: string[]) =>
+    values
+      .map(
+        (value, index) =>
+          `${index === 0 ? "M" : "L"}${xAt(index).toFixed(1)} ${value}`
+      )
+      .join(" ");
+
+  const areaPath = (values: string[]) =>
+    `${linePath(values)} L${xAt(points.length - 1).toFixed(1)} ${
+      FLOW_PAD.top + innerHeight
+    } L${FLOW_PAD.left} ${FLOW_PAD.top + innerHeight} Z`;
+
+  const incomePts = seriesPoints("income");
+  const expensePts = seriesPoints("expense");
+  const gridValues = [maxValue, maxValue / 2, 0];
+  const labelStride = Math.max(
+    1,
+    Math.ceil((points.length * 54) / Math.max(1, innerWidth))
+  );
+  const showDots = points.length <= 12;
+
+  if (width === 0) {
+    return <div ref={boxRef} style={{ height: FLOW_HEIGHT }} />;
+  }
+
+  return (
+    <div ref={boxRef}>
+      <svg
+        className="flow-chart"
+        width={width}
+        height={FLOW_HEIGHT}
+        viewBox={`0 0 ${width} ${FLOW_HEIGHT}`}
+        role="img"
+        aria-label="Income and expenses over time"
+      >
+        {gridValues.map((value) => {
+          const y = yAt(value);
+
+          return (
+            <g key={value}>
+              <line
+                x1={FLOW_PAD.left}
+                y1={y}
+                x2={width - FLOW_PAD.right}
+                y2={y}
+                stroke="rgba(255, 255, 255, 0.08)"
+                strokeDasharray={value === 0 ? undefined : "4 4"}
+              />
+              <text
+                x={FLOW_PAD.left - 8}
+                y={y + 4}
+                textAnchor="end"
+                className="flow-axis"
+              >
+                {compactMoney(value)}
+              </text>
+            </g>
+          );
+        })}
+
+        <path d={areaPath(incomePts)} fill="#10B981" opacity={0.08} />
+        <path d={areaPath(expensePts)} fill="#F43F5E" opacity={0.08} />
+
+        <path
+          d={linePath(incomePts)}
+          fill="none"
+          stroke="#10B981"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d={linePath(expensePts)}
+          fill="none"
+          stroke="#F43F5E"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {showDots &&
+          incomePts.map((value, index) => (
+            <circle
+              key={`income-${index}`}
+              cx={xAt(index)}
+              cy={value}
+              r={3}
+              fill="#111827"
+              stroke="#10B981"
+              strokeWidth={2}
+            />
+          ))}
+
+        {showDots &&
+          expensePts.map((value, index) => (
+            <circle
+              key={`expense-${index}`}
+              cx={xAt(index)}
+              cy={value}
+              r={3}
+              fill="#111827"
+              stroke="#F43F5E"
+              strokeWidth={2}
+            />
+          ))}
+
+        {points.map((point, index) =>
+          index % labelStride === 0 ? (
+            <text
+              key={point.month}
+              x={xAt(index)}
+              y={FLOW_HEIGHT - 8}
+              textAnchor="middle"
+              className="flow-axis"
+            >
+              {monthKeyLabel(point.month)}
+            </text>
+          ) : null
+        )}
+      </svg>
+    </div>
+  );
+}
 
 function App() {
   const [user, setUser] = useState<User | null>(() => {
@@ -1122,6 +1403,26 @@ function App() {
                   {formatMoney(outstandingCredit)}
                 </strong>
               </div>
+            </section>
+
+            <section className="data-section flow-section">
+              <div className="card-header">
+                <h3>Cash Flow</h3>
+                <div className="flow-legend">
+                  <span className="flow-key income">
+                    <span className="flow-swatch" />
+                    Income
+                  </span>
+                  <span className="flow-key expense">
+                    <span className="flow-swatch" />
+                    Expenses
+                  </span>
+                </div>
+              </div>
+              <CashFlowChart
+                income={selectedIncome}
+                expenses={selectedExpenses}
+              />
             </section>
 
             <section className="action-grid">
