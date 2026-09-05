@@ -110,6 +110,139 @@ type ModalType =
   | null;
 
 /* ============================================================
+   Pick-or-create field: choose an existing person/category
+   from the list, or type a brand-new one (created when the
+   form is submitted).
+   ============================================================ */
+
+type PickOption = { id: number; name: string; meta?: string };
+
+function PickOrCreate({
+  id,
+  value,
+  onChange,
+  options,
+  placeholder,
+  allowClear = false,
+  clearLabel = "None",
+  createLabel = "Create",
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: PickOption[];
+  placeholder?: string;
+  allowClear?: boolean;
+  clearLabel?: string;
+  createLabel?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  const trimmed = value.trim();
+  const lower = trimmed.toLowerCase();
+
+  const sortedOptions = useMemo(
+    () =>
+      [...options].sort((a, b) => a.name.localeCompare(b.name)),
+    [options]
+  );
+
+  const matches = sortedOptions.filter((option) =>
+    option.name.toLowerCase().includes(lower)
+  );
+  const exact = sortedOptions.some(
+    (option) => option.name.trim().toLowerCase() === lower
+  );
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const onDocClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onDocClick);
+
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [open]);
+
+  function pick(name: string) {
+    onChange(name);
+    setOpen(false);
+  }
+
+  return (
+    <div className="pickorcreate" ref={rootRef}>
+      <input
+        id={id}
+        type="text"
+        value={value}
+        placeholder={placeholder}
+        autoComplete="off"
+        onChange={(event) => {
+          onChange(event.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setOpen(false);
+          }
+        }}
+      />
+
+      {open && (matches.length > 0 || allowClear || trimmed) && (
+        <div className="poc-menu" role="listbox">
+          {allowClear && (
+            <button
+              type="button"
+              className="poc-option poc-clear"
+              role="option"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => pick("")}
+            >
+              {clearLabel}
+            </button>
+          )}
+
+          {matches.map((option) => (
+            <button
+              type="button"
+              className="poc-option"
+              role="option"
+              key={option.id}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => pick(option.name)}
+            >
+              {option.name}
+              {option.meta ? <small>{option.meta}</small> : null}
+            </button>
+          ))}
+
+          {trimmed && !exact && (
+            <button
+              type="button"
+              className="poc-create"
+              role="option"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => pick(trimmed)}
+            >
+              <span className="poc-plus">＋</span>
+              {createLabel} “{trimmed}”
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
    Cash-flow chart (income vs expenses over time)
    ============================================================ */
 
@@ -434,7 +567,7 @@ function App() {
 
   const [modal, setModal] = useState<ModalType>(null);
 
-  const [entryCategoryId, setEntryCategoryId] = useState("");
+  const [entryCategory, setEntryCategory] = useState("");
   const [entryAmount, setEntryAmount] = useState("");
   const [entryDate, setEntryDate] = useState("");
   const [entryDescription, setEntryDescription] = useState("");
@@ -448,7 +581,7 @@ function App() {
   const [personContact, setPersonContact] = useState("");
   const [personNote, setPersonNote] = useState("");
 
-  const [debtPersonId, setDebtPersonId] = useState("");
+  const [debtPersonText, setDebtPersonText] = useState("");
   const [debtAmount, setDebtAmount] = useState("");
   const [debtDate, setDebtDate] = useState("");
   const [debtRepaymentDate, setDebtRepaymentDate] = useState("");
@@ -458,7 +591,7 @@ function App() {
   const [debtRepaymentAmount, setDebtRepaymentAmount] = useState("");
   const [debtRepaymentDateValue, setDebtRepaymentDateValue] = useState("");
 
-  const [creditPersonId, setCreditPersonId] = useState("");
+  const [creditPersonText, setCreditPersonText] = useState("");
   const [creditAmount, setCreditAmount] = useState("");
   const [creditDate, setCreditDate] = useState("");
   const [creditRepaymentDate, setCreditRepaymentDate] = useState("");
@@ -813,7 +946,7 @@ function App() {
     setPersonContact("");
     setPersonNote("");
 
-    setDebtPersonId("");
+    setDebtPersonText("");
     setDebtAmount("");
     setDebtDate("");
     setDebtRepaymentDate("");
@@ -823,7 +956,7 @@ function App() {
     setDebtRepaymentAmount("");
     setDebtRepaymentDateValue("");
 
-    setCreditPersonId("");
+    setCreditPersonText("");
     setCreditAmount("");
     setCreditDate("");
     setCreditRepaymentDate("");
@@ -833,7 +966,7 @@ function App() {
     setCreditRepaymentAmount("");
     setCreditRepaymentDateValue("");
 
-    setEntryCategoryId("");
+    setEntryCategory("");
     setEntryAmount("");
     setEntryDate("");
     setEntryDescription("");
@@ -962,6 +1095,63 @@ function App() {
     }
   }
 
+  /* Person/category combobox resolution — reuse an existing record when the
+     typed text matches one, otherwise create it on the fly. */
+  async function resolvePerson(name: string) {
+    const clean = name.trim();
+
+    if (!clean) {
+      return null;
+    }
+
+    const existing = selectedPeople.find(
+      (person) =>
+        person.name.trim().toLowerCase() === clean.toLowerCase()
+    );
+
+    if (existing) {
+      return existing.id;
+    }
+
+    const person = (await postJSON("/people", {
+      finance_space_id: selectedSpaceId,
+      name: clean,
+      contact: "",
+      note: "",
+    })) as Person;
+
+    setPeople((current) => [...current, person]);
+
+    return person.id;
+  }
+
+  async function resolveCategory(
+    name: string,
+    type: "income" | "expense"
+  ) {
+    const clean = name.trim();
+
+    const existing = selectedCategories.find(
+      (category) =>
+        category.type === type &&
+        category.name.trim().toLowerCase() === clean.toLowerCase()
+    );
+
+    if (existing) {
+      return existing.id;
+    }
+
+    const category = (await postJSON("/categories", {
+      finance_space_id: selectedSpaceId,
+      name: clean,
+      type,
+    })) as Category;
+
+    setCategories((current) => [...current, category]);
+
+    return category.id;
+  }
+
   async function createDebt(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -973,9 +1163,11 @@ function App() {
     try {
       setError("");
 
+      const personId = await resolvePerson(debtPersonText);
+
       const debt = await postJSON("/debts", {
         finance_space_id: selectedSpaceId,
-        person_id: debtPersonId ? Number(debtPersonId) : null,
+        person_id: personId,
         amount: Number(debtAmount),
         date_borrowed: debtDate,
         repayment_date: debtRepaymentDate || null,
@@ -1029,9 +1221,11 @@ function App() {
     try {
       setError("");
 
+      const personId = await resolvePerson(creditPersonText);
+
       const credit = await postJSON("/credits", {
         finance_space_id: selectedSpaceId,
-        person_id: creditPersonId ? Number(creditPersonId) : null,
+        person_id: personId,
         amount: Number(creditAmount),
         date_lent: creditDate,
         repayment_date: creditRepaymentDate || null,
@@ -1082,8 +1276,8 @@ function App() {
       return;
     }
 
-    if (!entryCategoryId) {
-      setError("Select a category.");
+    if (!entryCategory.trim()) {
+      setError("Pick an existing category or type a new one.");
       return;
     }
 
@@ -1100,9 +1294,11 @@ function App() {
     try {
       setError("");
 
+      const categoryId = await resolveCategory(entryCategory, "income");
+
       const item = await postJSON("/income", {
         finance_space_id: selectedSpaceId,
-        category_id: Number(entryCategoryId),
+        category_id: categoryId,
         amount: Number(entryAmount),
         date_received: entryDate,
         description: entryDescription.trim(),
@@ -1123,8 +1319,8 @@ function App() {
       return;
     }
 
-    if (!entryCategoryId) {
-      setError("Select a category.");
+    if (!entryCategory.trim()) {
+      setError("Pick an existing category or type a new one.");
       return;
     }
 
@@ -1141,9 +1337,11 @@ function App() {
     try {
       setError("");
 
+      const categoryId = await resolveCategory(entryCategory, "expense");
+
       const item = await postJSON("/expenses", {
         finance_space_id: selectedSpaceId,
-        category_id: Number(entryCategoryId),
+        category_id: categoryId,
         amount: Number(entryAmount),
         date: entryDate,
         description: entryDescription.trim(),
@@ -1739,28 +1937,27 @@ function App() {
               >
                 <label htmlFor="entry-category">Category</label>
 
-                <select
+                <PickOrCreate
                   id="entry-category"
-                  value={entryCategoryId}
-                  onChange={(event) =>
-                    setEntryCategoryId(event.target.value)
+                  value={entryCategory}
+                  onChange={setEntryCategory}
+                  placeholder={
+                    modal === "income"
+                      ? "Pick an income category or type a new one"
+                      : "Pick an expense category or type a new one"
                   }
-                  required
-                >
-                  <option value="">Select a category</option>
-
-                  {selectedCategories
+                  createLabel="Add new category"
+                  options={selectedCategories
                     .filter((category) =>
                       modal === "income"
                         ? category.type === "income"
                         : category.type === "expense"
                     )
-                    .map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                </select>
+                    .map((category) => ({
+                      id: category.id,
+                      name: category.name,
+                    }))}
+                />
 
                 <label htmlFor="entry-amount">Amount</label>
 
@@ -1881,21 +2078,20 @@ function App() {
               <form onSubmit={createDebt}>
                 <label htmlFor="debt-person">Person</label>
 
-                <select
+                <PickOrCreate
                   id="debt-person"
-                  value={debtPersonId}
-                  onChange={(event) =>
-                    setDebtPersonId(event.target.value)
-                  }
-                >
-                  <option value="">No person</option>
-
-                  {selectedPeople.map((person) => (
-                    <option key={person.id} value={person.id}>
-                      {person.name}
-                    </option>
-                  ))}
-                </select>
+                  value={debtPersonText}
+                  onChange={setDebtPersonText}
+                  placeholder="Pick a person or type a new name"
+                  createLabel="Add new person"
+                  allowClear
+                  clearLabel="No person"
+                  options={selectedPeople.map((person) => ({
+                    id: person.id,
+                    name: person.name,
+                    meta: person.contact || person.note || undefined,
+                  }))}
+                />
 
                 <label htmlFor="debt-amount">Amount</label>
 
@@ -2017,21 +2213,20 @@ function App() {
               <form onSubmit={createCredit}>
                 <label htmlFor="credit-person">Person</label>
 
-                <select
+                <PickOrCreate
                   id="credit-person"
-                  value={creditPersonId}
-                  onChange={(event) =>
-                    setCreditPersonId(event.target.value)
-                  }
-                >
-                  <option value="">No person</option>
-
-                  {selectedPeople.map((person) => (
-                    <option key={person.id} value={person.id}>
-                      {person.name}
-                    </option>
-                  ))}
-                </select>
+                  value={creditPersonText}
+                  onChange={setCreditPersonText}
+                  placeholder="Pick a person or type a new name"
+                  createLabel="Add new person"
+                  allowClear
+                  clearLabel="No person"
+                  options={selectedPeople.map((person) => ({
+                    id: person.id,
+                    name: person.name,
+                    meta: person.contact || person.note || undefined,
+                  }))}
+                />
 
                 <label htmlFor="credit-amount">Amount</label>
 
