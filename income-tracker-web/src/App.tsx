@@ -902,7 +902,10 @@ function App() {
     return (
       <div className="app">
         <div className="login-container">
-          <h1>Income Tracker</h1>
+          <div className="login-brand">
+            <img className="brand-logo" src="/favicon.svg" alt="" />
+            <h1>Income Tracker</h1>
+          </div>
 
           <div className="login-card">
             <h2>
@@ -1017,9 +1020,12 @@ function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div>
-          <h1>Income Tracker</h1>
-          <p>Welcome, {user.name}</p>
+        <div className="brand">
+          <img className="brand-logo" src="/favicon.svg" alt="" />
+          <div>
+            <h1>Income Tracker</h1>
+            <p>Welcome, {user.name}</p>
+          </div>
         </div>
 
         <button className="logout-button" onClick={logout}>

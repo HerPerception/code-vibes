@@ -642,11 +642,18 @@ input:-webkit-autofill:focus {
 }
 
 .data-section {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   padding: 1.25rem;
   border-radius: 16px;
   background: var(--surface-1);
   border: 1px solid var(--border);
+}
+
+/* The repayments grid directly follows the Credits section — give it
+   the same breathing room as the other ledger blocks instead of
+   sitting flush against them. */
+.data-section + .transactions-grid {
+  margin-top: 2rem;
 }
 
 .record-list {
