@@ -2055,6 +2055,8 @@ function App() {
                   </div>
                 )}
               </div>
+            </section>
+
             <section className="data-section flow-section">
               <div className="card-header">
                 <div className="flow-head">
