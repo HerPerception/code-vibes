@@ -845,6 +845,37 @@ input:-webkit-autofill:focus {
   box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
 }
 
+.flow-tip-dot.net {
+  background: #818cf8;
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.6);
+}
+
+.flow-tip-row.net {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.flow-tip-row .flow-pos {
+  color: var(--income);
+}
+
+.flow-tip-row .flow-neg {
+  color: var(--expense);
+}
+
+/* One-line takeaway under the chart */
+.flow-insight {
+  margin: 14px 0 2px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--primary);
+  background: rgba(59, 130, 246, 0.07);
+  border-radius: 0 10px 10px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 /* =========================
    MODALS
 ========================= */

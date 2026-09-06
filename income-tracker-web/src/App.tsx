@@ -424,11 +424,6 @@ function CashFlowChart({
       )
       .join(" ");
 
-  const areaPath = (values: string[]) =>
-    `${linePath(values)} L${xAt(points.length - 1).toFixed(1)} ${
-      FLOW_PAD.top + innerHeight
-    } L${FLOW_PAD.left} ${FLOW_PAD.top + innerHeight} Z`;
-
   const incomePts = seriesPoints("income");
   const expensePts = seriesPoints("expense");
 
@@ -442,6 +437,100 @@ function CashFlowChart({
     .map((_, index) => index)
     .filter((index) => index % labelStride === 0);
   const showDots = points.length <= 12;
+
+  /* Slice the space between the two lines into month segments so the
+     dominant series is visible at a glance. Segments are split where the
+     lines cross, keeping the colour honest through a change of leader. */
+  const gapSegments = (() => {
+    const segments: { d: string; color: string }[] = [];
+
+    for (let index = 0; index < points.length - 1; index++) {
+      const x0 = xAt(index);
+      const x1 = xAt(index + 1);
+      const i0 = Number(incomePts[index]);
+      const e0 = Number(expensePts[index]);
+      const i1 = Number(incomePts[index + 1]);
+      const e1 = Number(expensePts[index + 1]);
+      const d0 = e0 - i0;
+      const d1 = e1 - i1;
+
+      const push = (
+        xL: number,
+        iL: number,
+        eL: number,
+        xR: number,
+        iR: number,
+        eR: number
+      ) => {
+        const pos = eL + eR - (iL + iR) > 0;
+        segments.push({
+          d: `M ${xL.toFixed(1)} ${iL.toFixed(1)} L ${xL.toFixed(1)} ${eL.toFixed(
+            1
+          )} L ${xR.toFixed(1)} ${eR.toFixed(1)} L ${xR.toFixed(1)} ${iR.toFixed(
+            1
+          )} Z`,
+          color: pos ? "#10B981" : "#F43F5E",
+        });
+      };
+
+      if ((d0 >= 0 && d1 >= 0) || (d0 <= 0 && d1 <= 0)) {
+        push(x0, i0, e0, x1, i1, e1);
+      } else {
+        const f = d0 / (d0 - d1);
+        const xm = x0 + f * (x1 - x0);
+        const im = i0 + f * (i1 - i0);
+        const em = e0 + f * (e1 - e0);
+
+        push(x0, i0, e0, xm, im, em);
+        push(xm, im, em, x1, i1, e1);
+      }
+    }
+
+    return segments;
+  })();
+
+  /* A one-line verdict computed from the same data as the chart. */
+  const insight = (() => {
+    const netByMonth = points.map((point) => ({
+      month: point.month,
+      net: point.income - point.expense,
+    }));
+    const positiveCount = netByMonth.filter((entry) => entry.net > 0).length;
+    const totalNet = netByMonth.reduce((sum, entry) => sum + entry.net, 0);
+
+    if (netByMonth.length === 1) {
+      const only = netByMonth[0];
+
+      return only.net >= 0
+        ? `You kept ${fullMoney(only.net)} this month — nice.`
+        : `You spent ${fullMoney(-only.net)} more than you earned this month.`;
+    }
+
+    const best = netByMonth.reduce((a, b) => (b.net > a.net ? b : a));
+
+    if (totalNet >= 0) {
+      const span =
+        positiveCount === netByMonth.length
+          ? "every month"
+          : `${positiveCount} of ${netByMonth.length} months`;
+
+      return `Net positive in ${span} — up ${fullMoney(
+        totalNet
+      )} overall. Best month: ${monthLongLabel(best.month)} (+${fullMoney(
+        best.net
+      )}).`;
+    }
+
+    const worst = netByMonth.reduce((a, b) => (b.net < a.net ? b : a));
+
+    return `Expenses beat income in ${
+      netByMonth.length - positiveCount
+    } of ${netByMonth.length} months — down ${fullMoney(
+      -totalNet
+    )} overall. Worst month: ${monthLongLabel(worst.month)} (${fullMoney(
+      worst.net
+    )}).`;
+  })();
 
   const handleChartMove = (event: ReactMouseEvent<SVGSVGElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -479,29 +568,6 @@ function CashFlowChart({
         onMouseMove={handleChartMove}
         onMouseLeave={() => setHover(null)}
       >
-        <defs>
-          <linearGradient
-            id="flowAreaIncome"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop offset="0%" stopColor="#10B981" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-          </linearGradient>
-          <linearGradient
-            id="flowAreaExpense"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#F43F5E" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-
         {gridTicks.map((value) => {
           const y = yAt(value);
 
@@ -562,8 +628,14 @@ function CashFlowChart({
           );
         })}
 
-        <path d={areaPath(incomePts)} fill="url(#flowAreaIncome)" />
-        <path d={areaPath(expensePts)} fill="url(#flowAreaExpense)" />
+        {gapSegments.map((segment, index) => (
+          <path
+            key={`gap-${index}`}
+            d={segment.d}
+            fill={segment.color}
+            opacity={0.16}
+          />
+        ))}
 
         {hoverIndex !== null && (
           <line
@@ -639,6 +711,23 @@ function CashFlowChart({
             />
           ))}
 
+        <circle
+          cx={xAt(points.length - 1)}
+          cy={Number(incomePts[points.length - 1])}
+          r={4.5}
+          fill="#0b0f19"
+          stroke="#10B981"
+          strokeWidth={2.5}
+        />
+        <circle
+          cx={xAt(points.length - 1)}
+          cy={Number(expensePts[points.length - 1])}
+          r={4.5}
+          fill="#0b0f19"
+          stroke="#F43F5E"
+          strokeWidth={2.5}
+        />
+
         {hoverIndex !== null && (
           <>
             <circle
@@ -690,8 +779,27 @@ function CashFlowChart({
             Expenses
             <strong>{fullMoney(hoverPoint.expense)}</strong>
           </div>
+
+          <div className="flow-tip-row">
+            <span className="flow-tip-dot net" />
+            Net
+            <strong
+              className={
+                hoverPoint.income - hoverPoint.expense >= 0
+                  ? "flow-pos"
+                  : "flow-neg"
+              }
+            >
+              {hoverPoint.income - hoverPoint.expense >= 0 ? "+" : "−"}
+              {fullMoney(
+                Math.abs(hoverPoint.income - hoverPoint.expense)
+              )}
+            </strong>
+          </div>
         </div>
       )}
+
+      <p className="flow-insight">{insight}</p>
     </div>
   );
 }
@@ -2062,8 +2170,8 @@ function App() {
                 <div className="flow-head">
                   <h3>Cash Flow</h3>
                   <p className="flow-subtitle">
-                    Income vs expenses, month by month — hover a point for
-                    the exact figures.
+                    Income vs expenses — the shaded band shows which one was
+                    on top each month.
                   </p>
                 </div>
                 <div className="flow-legend">
