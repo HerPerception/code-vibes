@@ -774,6 +774,77 @@ input:-webkit-autofill:focus {
   background: var(--expense);
 }
 
+.flow-wrap {
+  position: relative;
+}
+
+.flow-head {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.flow-subtitle {
+  margin: 2px 0 0;
+  color: var(--text-faint);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.flow-tip {
+  position: absolute;
+  z-index: 5;
+  transform: translateX(-50%);
+  pointer-events: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(17, 24, 39, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-modal);
+  backdrop-filter: blur(6px);
+}
+
+.flow-tip-title {
+  margin: 0 0 6px;
+  color: var(--text-h);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.flow-tip-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: nowrap;
+}
+
+.flow-tip-row strong {
+  color: var(--text-h);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+}
+
+.flow-tip-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.flow-tip-dot.in {
+  background: var(--income);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.flow-tip-dot.ex {
+  background: var(--expense);
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);
+}
+
 /* =========================
    MODALS
 ========================= */
@@ -907,10 +978,6 @@ input:-webkit-autofill:focus {
   background: rgba(59, 130, 246, 0.12);
   box-shadow: none;
   transform: none;
-}
-
-.poc-option.selected {
-  background: rgba(59, 130, 246, 0.16);
 }
 
 .poc-clear {

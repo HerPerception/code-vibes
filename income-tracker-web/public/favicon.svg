@@ -1,8 +1,50 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
-  <rect width="120" height="120" rx="28" fill="#111827"/>
-  <rect x="2" y="2" width="116" height="116" rx="26" stroke="rgba(59, 130, 246, 0.3)" stroke-width="2"/>
-  <path d="M32 78L48 52L62 66L88 34" stroke="#3B82F6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="88" cy="34" r="6" fill="#10B981"/>
-  <path d="M40 86H80" stroke="#4B5563" stroke-width="4" stroke-linecap="round"/>
-  <path d="M60 28V36M60 84V92" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b2740" />
+      <stop offset="100%" stop-color="#0b0f19" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.55" r="0.6">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="trend" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#93c5fd" />
+      <stop offset="100%" stop-color="#2563eb" />
+    </linearGradient>
+    <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#3b82f6" stop-opacity="0" />
+    </linearGradient>
+    <linearGradient id="peak" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+
+  <rect width="120" height="120" rx="28" fill="url(#tile)" />
+  <rect width="120" height="120" rx="28" fill="url(#glow)" />
+  <rect x="2" y="2" width="116" height="116" rx="26" stroke="rgba(148, 163, 184, 0.18)" stroke-width="1.5" />
+
+  <!-- ledger gridlines -->
+  <g stroke="rgba(148, 163, 184, 0.09)" stroke-width="1">
+    <line x1="26" y1="36" x2="94" y2="36" />
+    <line x1="26" y1="52" x2="94" y2="52" />
+    <line x1="26" y1="68" x2="94" y2="68" />
+    <line x1="26" y1="84" x2="94" y2="84" />
+  </g>
+
+  <!-- baseline -->
+  <path d="M18 94 H102" stroke="#475569" stroke-width="3" stroke-linecap="round" />
+
+  <!-- faint area rising under the trend -->
+  <path d="M20 94 L46 64 L62 76 L98 30 L98 94 Z" fill="url(#area)" />
+
+  <!-- rising trend line -->
+  <path d="M20 94 L46 64 L62 76 L98 30" stroke="url(#trend)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- target / peak marker -->
+  <circle cx="98" cy="30" r="10" stroke="rgba(16, 185, 129, 0.35)" stroke-width="1.5" />
+  <circle cx="98" cy="30" r="6.5" fill="url(#peak)" stroke="#0b0f19" stroke-width="2.5" />
+  <circle cx="95.6" cy="27.6" r="2" fill="#a7f3d0" />
 </svg>

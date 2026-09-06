@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, MouseEvent as ReactMouseEvent } from "react";
 import "./App.css";
 
 const API_URL = (
@@ -314,6 +314,7 @@ function CashFlowChart({
   expenses: Expense[];
 }) {
   const [width, setWidth] = useState(0);
+  const [hover, setHover] = useState<number | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -331,6 +332,23 @@ function CashFlowChart({
 
     return () => observer.disconnect();
   }, []);
+
+  function fullMoney(amount: number) {
+    return new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+
+  function monthLongLabel(key: string) {
+    const [year, month] = key.split("-").map(Number);
+
+    return new Date(year, month - 1, 1).toLocaleDateString("en-NG", {
+      month: "long",
+      year: "numeric",
+    });
+  }
 
   const points = useMemo<FlowPoint[]>(() => {
     const sums = new Map<string, FlowPoint>();
@@ -413,19 +431,44 @@ function CashFlowChart({
 
   const incomePts = seriesPoints("income");
   const expensePts = seriesPoints("expense");
+
   const gridValues = [maxValue, maxValue / 2, 0];
+  const gridTicks = [maxValue * 0.75, maxValue * 0.25];
   const labelStride = Math.max(
     1,
     Math.ceil((points.length * 54) / Math.max(1, innerWidth))
   );
+  const labeledIndexes = points
+    .map((_, index) => index)
+    .filter((index) => index % labelStride === 0);
   const showDots = points.length <= 12;
+
+  const handleChartMove = (event: ReactMouseEvent<SVGSVGElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const index = Math.round((x - FLOW_PAD.left) / xStep);
+
+    setHover(Math.min(points.length - 1, Math.max(0, index)));
+  };
+
+  const hoverIndex =
+    hover !== null && hover < points.length ? hover : null;
+  const hoverPoint = hoverIndex !== null ? points[hoverIndex] : null;
+  const tipHalf = Math.max(60, Math.min(100, Math.floor(width * 0.45)));
+  const tipLeft =
+    hoverIndex !== null
+      ? Math.min(
+          Math.max(xAt(hoverIndex), tipHalf),
+          Math.max(tipHalf, width - tipHalf)
+        )
+      : 0;
 
   if (width === 0) {
     return <div ref={boxRef} style={{ height: FLOW_HEIGHT }} />;
   }
 
   return (
-    <div ref={boxRef}>
+    <div ref={boxRef} className="flow-wrap">
       <svg
         className="flow-chart"
         width={width}
@@ -433,7 +476,48 @@ function CashFlowChart({
         viewBox={`0 0 ${width} ${FLOW_HEIGHT}`}
         role="img"
         aria-label="Income and expenses over time"
+        onMouseMove={handleChartMove}
+        onMouseLeave={() => setHover(null)}
       >
+        <defs>
+          <linearGradient
+            id="flowAreaIncome"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop offset="0%" stopColor="#10B981" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient
+            id="flowAreaExpense"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#F43F5E" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+
+        {gridTicks.map((value) => {
+          const y = yAt(value);
+
+          return (
+            <line
+              key={`tick-${value}`}
+              x1={FLOW_PAD.left}
+              y1={y}
+              x2={width - FLOW_PAD.right}
+              y2={y}
+              stroke="rgba(255, 255, 255, 0.05)"
+              strokeDasharray="2 6"
+            />
+          );
+        })}
+
         {gridValues.map((value) => {
           const y = yAt(value);
 
@@ -444,7 +528,11 @@ function CashFlowChart({
                 y1={y}
                 x2={width - FLOW_PAD.right}
                 y2={y}
-                stroke="rgba(255, 255, 255, 0.08)"
+                stroke={
+                  value === 0
+                    ? "rgba(255, 255, 255, 0.18)"
+                    : "rgba(255, 255, 255, 0.07)"
+                }
                 strokeDasharray={value === 0 ? undefined : "4 4"}
               />
               <text
@@ -459,8 +547,54 @@ function CashFlowChart({
           );
         })}
 
-        <path d={areaPath(incomePts)} fill="#10B981" opacity={0.08} />
-        <path d={areaPath(expensePts)} fill="#F43F5E" opacity={0.08} />
+        {labeledIndexes.map((index) => {
+          const x = xAt(index);
+
+          return (
+            <line
+              key={`vline-${index}`}
+              x1={x}
+              y1={FLOW_PAD.top}
+              x2={x}
+              y2={FLOW_PAD.top + innerHeight}
+              stroke="rgba(255, 255, 255, 0.04)"
+            />
+          );
+        })}
+
+        <path d={areaPath(incomePts)} fill="url(#flowAreaIncome)" />
+        <path d={areaPath(expensePts)} fill="url(#flowAreaExpense)" />
+
+        {hoverIndex !== null && (
+          <line
+            x1={xAt(hoverIndex)}
+            y1={FLOW_PAD.top}
+            x2={xAt(hoverIndex)}
+            y2={FLOW_PAD.top + innerHeight}
+            stroke="rgba(255, 255, 255, 0.22)"
+            strokeDasharray="3 3"
+          />
+        )}
+
+        {/* soft glow under the main lines */}
+        <path
+          d={linePath(incomePts)}
+          fill="none"
+          stroke="#10B981"
+          strokeWidth={6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.14}
+        />
+        <path
+          d={linePath(expensePts)}
+          fill="none"
+          stroke="#F43F5E"
+          strokeWidth={6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.14}
+        />
 
         <path
           d={linePath(incomePts)}
@@ -505,6 +639,27 @@ function CashFlowChart({
             />
           ))}
 
+        {hoverIndex !== null && (
+          <>
+            <circle
+              cx={xAt(hoverIndex)}
+              cy={Number(incomePts[hoverIndex])}
+              r={5.5}
+              fill="#10B981"
+              stroke="#0b0f19"
+              strokeWidth={2}
+            />
+            <circle
+              cx={xAt(hoverIndex)}
+              cy={Number(expensePts[hoverIndex])}
+              r={5.5}
+              fill="#F43F5E"
+              stroke="#0b0f19"
+              strokeWidth={2}
+            />
+          </>
+        )}
+
         {points.map((point, index) =>
           index % labelStride === 0 ? (
             <text
@@ -519,6 +674,24 @@ function CashFlowChart({
           ) : null
         )}
       </svg>
+
+      {hoverPoint && (
+        <div className="flow-tip" style={{ left: tipLeft, top: 6 }}>
+          <p className="flow-tip-title">{monthLongLabel(hoverPoint.month)}</p>
+
+          <div className="flow-tip-row">
+            <span className="flow-tip-dot in" />
+            Income
+            <strong>{fullMoney(hoverPoint.income)}</strong>
+          </div>
+
+          <div className="flow-tip-row">
+            <span className="flow-tip-dot ex" />
+            Expenses
+            <strong>{fullMoney(hoverPoint.expense)}</strong>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -1603,26 +1776,6 @@ function App() {
               </div>
             </section>
 
-            <section className="data-section flow-section">
-              <div className="card-header">
-                <h3>Cash Flow</h3>
-                <div className="flow-legend">
-                  <span className="flow-key income">
-                    <span className="flow-swatch" />
-                    Income
-                  </span>
-                  <span className="flow-key expense">
-                    <span className="flow-swatch" />
-                    Expenses
-                  </span>
-                </div>
-              </div>
-              <CashFlowChart
-                income={selectedIncome}
-                expenses={selectedExpenses}
-              />
-            </section>
-
             <section className="action-grid">
               <button onClick={() => setModal("income")}>
                 + Add Income
@@ -1902,6 +2055,31 @@ function App() {
                   </div>
                 )}
               </div>
+            <section className="data-section flow-section">
+              <div className="card-header">
+                <div className="flow-head">
+                  <h3>Cash Flow</h3>
+                  <p className="flow-subtitle">
+                    Income vs expenses, month by month — hover a point for
+                    the exact figures.
+                  </p>
+                </div>
+                <div className="flow-legend">
+                  <span className="flow-key income">
+                    <span className="flow-swatch" />
+                    Income
+                  </span>
+                  <span className="flow-key expense">
+                    <span className="flow-swatch" />
+                    Expenses
+                  </span>
+                </div>
+              </div>
+
+              <CashFlowChart
+                income={selectedIncome}
+                expenses={selectedExpenses}
+              />
             </section>
           </>
         )}
