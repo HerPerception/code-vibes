@@ -578,7 +578,7 @@ function CashFlowChart({
               y1={y}
               x2={width - FLOW_PAD.right}
               y2={y}
-              stroke="rgba(255, 255, 255, 0.05)"
+              className="fg-dash"
               strokeDasharray="2 6"
             />
           );
@@ -594,11 +594,7 @@ function CashFlowChart({
                 y1={y}
                 x2={width - FLOW_PAD.right}
                 y2={y}
-                stroke={
-                  value === 0
-                    ? "rgba(255, 255, 255, 0.18)"
-                    : "rgba(255, 255, 255, 0.07)"
-                }
+                className={value === 0 ? "fg-zero" : "fg-grid"}
                 strokeDasharray={value === 0 ? undefined : "4 4"}
               />
               <text
@@ -623,7 +619,7 @@ function CashFlowChart({
               y1={FLOW_PAD.top}
               x2={x}
               y2={FLOW_PAD.top + innerHeight}
-              stroke="rgba(255, 255, 255, 0.04)"
+              className="fg-faint"
             />
           );
         })}
@@ -643,7 +639,7 @@ function CashFlowChart({
             y1={FLOW_PAD.top}
             x2={xAt(hoverIndex)}
             y2={FLOW_PAD.top + innerHeight}
-            stroke="rgba(255, 255, 255, 0.22)"
+            className="fg-guide"
             strokeDasharray="3 3"
           />
         )}
@@ -692,7 +688,7 @@ function CashFlowChart({
               cx={xAt(index)}
               cy={value}
               r={3}
-              fill="#111827"
+              className="flow-hole"
               stroke="#10B981"
               strokeWidth={2}
             />
@@ -705,7 +701,7 @@ function CashFlowChart({
               cx={xAt(index)}
               cy={value}
               r={3}
-              fill="#111827"
+              className="flow-hole"
               stroke="#F43F5E"
               strokeWidth={2}
             />
@@ -715,7 +711,7 @@ function CashFlowChart({
           cx={xAt(points.length - 1)}
           cy={Number(incomePts[points.length - 1])}
           r={4.5}
-          fill="#0b0f19"
+          className="flow-hole"
           stroke="#10B981"
           strokeWidth={2.5}
         />
@@ -723,7 +719,7 @@ function CashFlowChart({
           cx={xAt(points.length - 1)}
           cy={Number(expensePts[points.length - 1])}
           r={4.5}
-          fill="#0b0f19"
+          className="flow-hole"
           stroke="#F43F5E"
           strokeWidth={2.5}
         />
@@ -735,7 +731,7 @@ function CashFlowChart({
               cy={Number(incomePts[hoverIndex])}
               r={5.5}
               fill="#10B981"
-              stroke="#0b0f19"
+              className="flow-halo"
               strokeWidth={2}
             />
             <circle
@@ -743,7 +739,7 @@ function CashFlowChart({
               cy={Number(expensePts[hoverIndex])}
               r={5.5}
               fill="#F43F5E"
-              stroke="#0b0f19"
+              className="flow-halo"
               strokeWidth={2}
             />
           </>
@@ -804,7 +800,92 @@ function CashFlowChart({
   );
 }
 
+type Theme = "dark" | "light";
+
+function ThemeToggle({
+  theme,
+  onToggle,
+}: {
+  theme: Theme;
+  onToggle: () => void;
+}) {
+  const isDark = theme === "dark";
+
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={onToggle}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+    >
+      {isDark ? (
+        /* Sun — click to go light */
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+      ) : (
+        /* Moon — click to go dark */
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 function App() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") {
+      return "dark";
+    }
+
+    return window.localStorage.getItem("it-theme") === "light"
+      ? "light"
+      : "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) {
+      meta.setAttribute(
+        "content",
+        theme === "light" ? "#eef2f7" : "#0b0f19"
+      );
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((current) => {
+      const next: Theme = current === "dark" ? "light" : "dark";
+      try {
+        window.localStorage.setItem("it-theme", next);
+      } catch {
+        /* storage may be unavailable — ignore */
+      }
+      return next;
+    });
+  };
+
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
 
@@ -1662,6 +1743,8 @@ function App() {
     return (
       <div className="app">
         <div className="login-container">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+
           <div className="login-brand">
             <img className="brand-logo" src="/favicon.svg" alt="" />
             <h1>Income Tracker</h1>
@@ -1788,9 +1871,13 @@ function App() {
           </div>
         </div>
 
-        <button className="logout-button" onClick={logout}>
-          Logout
-        </button>
+        <div className="topbar-actions">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+
+          <button className="logout-button" onClick={logout}>
+            Logout
+          </button>
+        </div>
       </header>
 
       <main className="dashboard">

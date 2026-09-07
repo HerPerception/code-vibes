@@ -80,7 +80,7 @@ button:disabled {
   padding: 12px 14px;
   border: 1px solid var(--border-strong);
   border-radius: 8px;
-  background: #0b0f19;
+  background: var(--input-bg);
   color: var(--text-h);
   outline: none;
   transition:
@@ -111,7 +111,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--text-h);
-  -webkit-box-shadow: 0 0 0 1000px #0b0f19 inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
   caret-color: var(--text-h);
   transition: background-color 9999s ease-in-out 0s;
 }
@@ -157,7 +157,7 @@ input:-webkit-autofill:focus {
   padding: 32px;
   border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(31, 41, 55, 0.5), rgba(17, 24, 39, 0.85)),
+    linear-gradient(180deg, var(--login-tint-a), var(--login-tint-b)),
     var(--surface-1);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-modal);
@@ -193,13 +193,13 @@ input:-webkit-autofill:focus {
   padding: 8px;
   border: none;
   background: transparent;
-  color: #93c5fd;
+  color: var(--link);
   font-weight: 600;
 }
 
 .login-card .link-button:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.12);
-  color: #dbeafe;
+  background: var(--accent-overlay);
+  color: var(--link-hover);
   box-shadow: none;
   transform: none;
 }
@@ -212,7 +212,7 @@ input:-webkit-autofill:focus {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(11, 15, 25, 0.8);
+  background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 16px 32px;
@@ -252,14 +252,14 @@ input:-webkit-autofill:focus {
 /* Logout button (neutral glass) */
 .logout-button {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #d1d5db;
+  border: 1px solid var(--border-raised);
+  color: var(--ghost-text);
 }
 
 .logout-button:hover:not(:disabled) {
-  background: #1f2937;
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #f9fafb;
+  background: var(--ghost-hover-bg);
+  border-color: var(--ghost-hover-border);
+  color: var(--ghost-hover-text);
   box-shadow: none;
   transform: none;
 }
@@ -300,15 +300,15 @@ input:-webkit-autofill:focus {
 /* Refresh button (neutral glass) */
 .dashboard-header > button {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #d1d5db;
+  border: 1px solid var(--border-raised);
+  color: var(--ghost-text);
   white-space: nowrap;
 }
 
 .dashboard-header > button:hover:not(:disabled) {
-  background: #1f2937;
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #f9fafb;
+  background: var(--ghost-hover-bg);
+  border-color: var(--ghost-hover-border);
+  color: var(--ghost-hover-text);
   box-shadow: none;
   transform: none;
 }
@@ -326,9 +326,9 @@ input:-webkit-autofill:focus {
 .error-box {
   margin-bottom: 24px;
   padding: 14px 16px;
-  background: rgba(244, 63, 94, 0.08);
-  border: 1px solid rgba(244, 63, 94, 0.28);
-  color: #fda4af;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
   border-radius: 10px;
   font-size: 14px;
 }
@@ -391,7 +391,7 @@ input:-webkit-autofill:focus {
 }
 
 .space-card.active {
-  background: rgba(59, 130, 246, 0.12);
+  background: var(--accent-overlay);
   border-color: var(--primary);
   color: var(--text-h);
 }
@@ -409,7 +409,7 @@ input:-webkit-autofill:focus {
 }
 
 .space-card.active span {
-  color: #bfdbfe;
+  color: var(--accent-soft);
 }
 
 /* =========================
@@ -427,7 +427,7 @@ input:-webkit-autofill:focus {
   padding: 20px;
   border-radius: 16px;
   background:
-    linear-gradient(160deg, rgba(59, 130, 246, 0.06), transparent 45%),
+    linear-gradient(160deg, var(--accent-tint), transparent 45%),
     var(--surface-1);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-card);
@@ -546,13 +546,13 @@ input:-webkit-autofill:focus {
 
 .form-actions button[type="button"] {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-raised);
   color: var(--text-muted);
 }
 
 .form-actions button[type="button"]:hover:not(:disabled) {
-  background: #1f2937;
-  color: #f9fafb;
+  background: var(--ghost-hover-bg);
+  color: var(--ghost-hover-text);
   box-shadow: none;
   transform: none;
 }
@@ -569,7 +569,7 @@ input:-webkit-autofill:focus {
 
 .transaction-card {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+    linear-gradient(180deg, var(--sheen), transparent),
     var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 16px;
@@ -597,9 +597,9 @@ input:-webkit-autofill:focus {
   height: 28px;
   padding: 0 9px;
   border-radius: 999px;
-  background: rgba(55, 65, 81, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  color: #d1d5db;
+  background: var(--chip-bg);
+  border: 1px solid var(--chip-border);
+  color: var(--ghost-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -799,8 +799,8 @@ input:-webkit-autofill:focus {
   pointer-events: none;
   padding: 10px 12px;
   border-radius: 12px;
-  background: rgba(17, 24, 39, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--tip-bg);
+  border: 1px solid var(--tip-border);
   box-shadow: var(--shadow-modal);
   backdrop-filter: blur(6px);
 }
@@ -851,7 +851,7 @@ input:-webkit-autofill:focus {
 }
 
 .flow-tip-row.net {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border);
   margin-top: 4px;
   padding-top: 4px;
 }
@@ -869,7 +869,7 @@ input:-webkit-autofill:focus {
   margin: 14px 0 2px;
   padding: 10px 12px;
   border-left: 3px solid var(--primary);
-  background: rgba(59, 130, 246, 0.07);
+  background: var(--accent-tint);
   border-radius: 0 10px 10px 0;
   color: var(--text-muted);
   font-size: 13px;
@@ -900,7 +900,7 @@ input:-webkit-autofill:focus {
   padding: 1.5rem;
   border-radius: 18px;
   background: var(--surface-2);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-raised);
   box-shadow: var(--shadow-modal);
   color: var(--text);
 }
@@ -975,7 +975,7 @@ input:-webkit-autofill:focus {
   padding: 6px;
   border-radius: 12px;
   background: var(--surface-2);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-raised);
   box-shadow: var(--shadow-modal);
   backdrop-filter: blur(8px);
 }
@@ -1006,7 +1006,7 @@ input:-webkit-autofill:focus {
 
 .poc-option:hover:not(:disabled),
 .poc-create:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.12);
+  background: var(--accent-overlay);
   box-shadow: none;
   transform: none;
 }
@@ -1016,8 +1016,8 @@ input:-webkit-autofill:focus {
 }
 
 .poc-create {
-  color: #93c5fd;
-  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  color: var(--link);
+  border-top: 1px dashed var(--border-raised);
   border-radius: 0 0 8px 8px;
   margin-top: 2px;
 }
@@ -1166,5 +1166,104 @@ input:-webkit-autofill:focus {
   .flow-section .flow-legend {
     justify-content: flex-start;
   }
+}
+
+/* =========================
+   THEME TOGGLE
+========================= */
+
+.login-container {
+  position: relative;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Round icon button; uses the same neutral "ghost" language as
+   Logout / Refresh so it reads correctly in both themes. */
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border-raised);
+  color: var(--ghost-text);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover:not(:disabled) {
+  background: var(--ghost-hover-bg);
+  border-color: var(--ghost-hover-border);
+  color: var(--ghost-hover-text);
+  box-shadow: none;
+  transform: none;
+}
+
+.theme-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* Floating toggle in the corner of the login screen */
+.login-container > .theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+@media (max-width: 600px) {
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
+  }
+
+  .login-container > .theme-toggle {
+    top: 14px;
+    right: 14px;
+  }
+}
+
+/* =========================
+   CASH-FLOW CHART THEME NEUTRALS
+========================= */
+
+/* Gridlines / guides are painted with tokens so they flip with the
+   theme (white-on-dark -> slate-on-light) without touching the JSX. */
+.flow-chart .fg-faint {
+  stroke: var(--chart-grid-faint);
+}
+
+.flow-chart .fg-dash {
+  stroke: var(--chart-grid-dash);
+}
+
+.flow-chart .fg-grid {
+  stroke: var(--chart-grid);
+}
+
+.flow-chart .fg-zero {
+  stroke: var(--chart-grid-zero);
+}
+
+.flow-chart .fg-guide {
+  stroke: var(--chart-guide);
+}
+
+/* Data-point centers read as a "hole" in the line that matches the
+   card surface behind the chart. */
+.flow-hole {
+  fill: var(--surface-1);
+}
+
+.flow-halo {
+  stroke: var(--surface-1);
 }
 

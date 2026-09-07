@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0b0f19" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        if (localStorage.getItem("it-theme") === "light") {
+          document.documentElement.dataset.theme = "light";
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute("content", "#eef2f7");
+        }
+      } catch (e) {
+        /* storage may be unavailable — default to dark */
+      }
+    </script>
     <title>Income Tracker</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -1,6 +1,11 @@
 /* ============================================================
-   Global base + "Midnight Obsidian" theme tokens
-   (income-tracker-web)
+   Global base + theme tokens (income-tracker-web)
+
+   Tokens live on :root (dark = "Midnight Obsidian"). A complete
+   light palette is layered on with :root[data-theme="light"].
+   The app flips this attribute from App.tsx (persisted to
+   localStorage). Component styles in App.css must only reference
+   these tokens so a theme change re-skins everything in one place.
    ============================================================ */
 
 :root {
@@ -11,23 +16,40 @@
   --surface-1: #111827;
   --surface-2: #1f2937;
   --surface-glass: rgba(17, 24, 39, 0.72);
+  --input-bg: #0b0f19;
+  --topbar-bg: rgba(11, 15, 25, 0.8);
+  --login-tint-a: rgba(31, 41, 55, 0.5);
+  --login-tint-b: rgba(17, 24, 39, 0.85);
+  --sheen: rgba(255, 255, 255, 0.02);
 
   /* Lines */
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: #374151;
   --border-row: rgba(55, 65, 81, 0.4);
+  --border-raised: rgba(255, 255, 255, 0.12);
+  --chip-bg: rgba(55, 65, 81, 0.5);
+  --chip-border: rgba(255, 255, 255, 0.06);
 
   /* Text */
   --text: #e5e7eb;
   --text-h: #f9fafb;
   --text-muted: #9ca3af;
   --text-faint: #6b7280;
+  --ghost-text: #d1d5db;
+  --ghost-hover-text: #f9fafb;
+  --ghost-hover-bg: #1f2937;
+  --ghost-hover-border: rgba(255, 255, 255, 0.22);
+  --link: #93c5fd;
+  --link-hover: #dbeafe;
 
   /* Actions */
   --primary: #3b82f6;
   --primary-hover: #2563eb;
   --primary-glow: 0 0 12px rgba(59, 130, 246, 0.35);
   --ring: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  --accent-overlay: rgba(59, 130, 246, 0.12);
+  --accent-soft: #bfdbfe;
+  --accent-tint: rgba(59, 130, 246, 0.07);
 
   /* Financial semantics */
   --income: #10b981;
@@ -37,10 +59,24 @@
   --success: #4edea3;
   --error: #f87171;
 
+  /* Alert surfaces */
+  --danger-bg: rgba(244, 63, 94, 0.08);
+  --danger-border: rgba(244, 63, 94, 0.28);
+  --danger-text: #fda4af;
+
   /* Elevation */
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3),
     0 6px 18px -4px rgba(0, 0, 0, 0.45);
   --shadow-modal: 0 20px 48px -8px rgba(0, 0, 0, 0.7);
+
+  /* Cash-flow chart neutrals + tooltip */
+  --chart-grid-faint: rgba(255, 255, 255, 0.04);
+  --chart-grid-dash: rgba(255, 255, 255, 0.05);
+  --chart-grid: rgba(255, 255, 255, 0.07);
+  --chart-grid-zero: rgba(255, 255, 255, 0.18);
+  --chart-guide: rgba(255, 255, 255, 0.22);
+  --tip-bg: rgba(17, 24, 39, 0.96);
+  --tip-border: rgba(255, 255, 255, 0.12);
 
   /* Type */
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -53,6 +89,74 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ------------------------------------------------------------
+   Light theme ("Clarity")
+   ------------------------------------------------------------ */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces */
+  --bg: #eef2f7;
+  --surface-1: #ffffff;
+  --surface-2: #ffffff;
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --input-bg: #f8fafc;
+  --topbar-bg: rgba(255, 255, 255, 0.82);
+  --login-tint-a: rgba(255, 255, 255, 0);
+  --login-tint-b: rgba(255, 255, 255, 0);
+  --sheen: rgba(255, 255, 255, 0.5);
+
+  /* Lines */
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: #cbd5e1;
+  --border-row: #eef2f7;
+  --border-raised: rgba(15, 23, 42, 0.12);
+  --chip-bg: #eef2f7;
+  --chip-border: #e2e8f0;
+
+  /* Text */
+  --text: #334155;
+  --text-h: #0f172a;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+  --ghost-text: #475569;
+  --ghost-hover-text: #0f172a;
+  --ghost-hover-bg: #e2e8f0;
+  --ghost-hover-border: rgba(15, 23, 42, 0.2);
+  --link: #1d4ed8;
+  --link-hover: #1e40af;
+
+  /* Actions */
+  --primary-glow: 0 0 12px rgba(59, 130, 246, 0.28);
+  --ring: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  --accent-overlay: rgba(59, 130, 246, 0.1);
+  --accent-soft: #1e40af;
+  --accent-tint: rgba(59, 130, 246, 0.06);
+
+  /* Financial semantics */
+  --success: #059669;
+  --error: #dc2626;
+
+  /* Alert surfaces */
+  --danger-bg: #fff1f2;
+  --danger-border: rgba(225, 29, 72, 0.28);
+  --danger-text: #be123c;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 18px -4px rgba(15, 23, 42, 0.08);
+  --shadow-modal: 0 20px 48px -8px rgba(15, 23, 42, 0.18);
+
+  /* Cash-flow chart neutrals + tooltip */
+  --chart-grid-faint: rgba(15, 23, 42, 0.06);
+  --chart-grid-dash: rgba(15, 23, 42, 0.08);
+  --chart-grid: rgba(15, 23, 42, 0.12);
+  --chart-grid-zero: rgba(15, 23, 42, 0.28);
+  --chart-guide: rgba(15, 23, 42, 0.16);
+  --tip-bg: rgba(255, 255, 255, 0.98);
+  --tip-border: rgba(15, 23, 42, 0.1);
 }
 
 *,
@@ -110,10 +214,4 @@ input,
 select,
 textarea {
   font: inherit;
-}
-
-/* Keep the native dropdown / date pickers dark */
-input[type="date"],
-input[type="datetime-local"] {
-  color-scheme: dark;
 }
