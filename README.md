@@ -65,8 +65,31 @@ Configure the database connection and secrets via environment variables (or a `.
 | `JWT_SECRET` | Secret used to sign/verify auth tokens (**required**) |
 | `FRONTEND_URL` | Allowed CORS origin; defaults to `*` when unset |
 | `PORT` | HTTP port (default `8080`) |
+| `SLOW_QUERY_MS` | Log queries slower than this in ms (default `200`, `0` disables) |
 
-> Note: the repository does not ship database migrations — the schema is expected to exist in your PostgreSQL instance. Define tables matching the queries in the `internal/*` packages (or restore from your existing database) before first run.
+> Note: the repository does not ship the base schema — tables matching the queries in the `internal/*` packages are expected to exist in your PostgreSQL instance before first run.
+
+### Indexes
+
+`income-tracker/migrations/` holds additive, idempotent SQL — nothing there creates tables, so it is safe to run against an existing database and safe to run twice.
+
+```bash
+psql "postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" \
+  -f migrations/0001_hot_path_indexes.sql
+```
+
+Read `0001_hot_path_indexes.sql` before running it: the final statement adds a `UNIQUE` index on finance-space names and will fail if existing data has duplicates. The file includes a pre-flight query to check.
+
+### Slow-query logging
+
+There is no APM on this service, so every query exceeding `SLOW_QUERY_MS` is logged to stderr with its duration and row count:
+
+```
+[pgx] 2026/09/12 14:03:11 slow query 1.482s rows=412 (slow=3 of 1187)
+  sql: SELECT d.id, d.finance_space_id, ... FROM debts d JOIN finance_spaces fs ...
+```
+
+Bound parameters are deliberately excluded — the SQL text plus timing is what identifies a slow query, and the arguments carry emails, ids and amounts.
 
 ```bash
 cd income-tracker

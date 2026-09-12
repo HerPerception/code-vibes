@@ -3,8 +3,10 @@ package finance
 import (
 	"context"
 	"errors"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
+
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type FinanceSpace struct {
@@ -78,6 +80,16 @@ func Create(
 	)
 
 	if err != nil {
+		/* The SELECT EXISTS above catches the common case, but two concurrent
+		   creates for the same name can both pass it. The unique index on
+		   (user_id, lower(name)) is the real guard, so map its violation to
+		   the same error and the caller still sees a 409, not a 500. */
+		var pgErr *pgconn.PgError
+
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return FinanceSpace{}, ErrDuplicateName
+		}
+
 		return FinanceSpace{}, err
 	}
 

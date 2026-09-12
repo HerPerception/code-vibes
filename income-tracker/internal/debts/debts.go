@@ -152,21 +152,24 @@ func List(
 			d.finance_space_id,
 			d.person_id,
 			d.amount,
-			COALESCE(
-				(
-					SELECT SUM(dr.amount)
-					FROM debt_repayments dr
-					WHERE dr.debt_id = d.id
-				),
-				0
-			) AS amount_repaid,
+			COALESCE(SUM(dr.amount), 0) AS amount_repaid,
 			d.date_borrowed,
 			d.repayment_date,
 			d.description
 		FROM debts d
 		JOIN finance_spaces fs
 			ON d.finance_space_id = fs.id
+		LEFT JOIN debt_repayments dr
+			ON dr.debt_id = d.id
 		WHERE fs.user_id = $1
+		GROUP BY
+			d.id,
+			d.finance_space_id,
+			d.person_id,
+			d.amount,
+			d.date_borrowed,
+			d.repayment_date,
+			d.description
 		ORDER BY d.date_borrowed DESC, d.id DESC`,
 		userID,
 	)

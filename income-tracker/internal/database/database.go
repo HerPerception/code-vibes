@@ -26,5 +26,11 @@ func Connect() (*pgxpool.Pool, error) {
 
 	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeExec
 
+	// SLOW_QUERY_MS=0 means "don't trace at all" — attaching a tracer with a
+	// zero threshold would log every query, which is the opposite of quiet.
+	if threshold := slowQueryThreshold(); threshold > 0 {
+		config.ConnConfig.Tracer = newSlowQueryTracer(threshold)
+	}
+
 	return pgxpool.NewWithConfig(context.Background(), config)
 }

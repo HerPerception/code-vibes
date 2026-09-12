@@ -35,38 +35,54 @@ func Create(
 		return DebtRepayment{}, ErrInvalidAmount
 	}
 
-	var debtAmount float64
-	var amountRepaid float64
+	tx, err := conn.Begin(ctx)
 
-	err := conn.QueryRow(
+	if err != nil {
+		return DebtRepayment{}, err
+	}
+
+	defer tx.Rollback(ctx)
+
+	/* Lock the debt for the rest of the transaction. Without this the
+	   read-check-insert below is a time-of-check/time-of-use race: two
+	   concurrent repayments both read the same outstanding balance, both
+	   pass the check, and the debt ends up over-repaid. */
+	var debtAmount float64
+
+	err = tx.QueryRow(
 		ctx,
-		`SELECT
-			d.amount,
-			COALESCE(
-				(
-					SELECT SUM(dr.amount)
-					FROM debt_repayments dr
-					WHERE dr.debt_id = d.id
-				),
-				0
-			)
-		FROM debts d
-		JOIN finance_spaces fs
+		`SELECT d.amount
+		 FROM debts d
+		 JOIN finance_spaces fs
 			ON d.finance_space_id = fs.id
-		WHERE d.id = $1
-		AND fs.user_id = $2`,
+		 WHERE d.id = $1
+		 AND fs.user_id = $2
+		 FOR UPDATE OF d`,
 		debtID,
 		userID,
-	).Scan(
-		&debtAmount,
-		&amountRepaid,
-	)
+	).Scan(&debtAmount)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return DebtRepayment{}, ErrDebtNotFound
 		}
 
+		return DebtRepayment{}, err
+	}
+
+	/* Safe to total now: any concurrent repayment on this debt has either
+	   committed already or is blocked on the lock taken above. */
+	var amountRepaid float64
+
+	err = tx.QueryRow(
+		ctx,
+		`SELECT COALESCE(SUM(amount), 0)
+		 FROM debt_repayments
+		 WHERE debt_id = $1`,
+		debtID,
+	).Scan(&amountRepaid)
+
+	if err != nil {
 		return DebtRepayment{}, err
 	}
 
@@ -78,7 +94,7 @@ func Create(
 
 	var repayment DebtRepayment
 
-	err = conn.QueryRow(
+	err = tx.QueryRow(
 		ctx,
 		`INSERT INTO debt_repayments (
 			debt_id,
@@ -98,6 +114,10 @@ func Create(
 	)
 
 	if err != nil {
+		return DebtRepayment{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
 		return DebtRepayment{}, err
 	}
 
