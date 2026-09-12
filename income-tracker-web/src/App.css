@@ -760,10 +760,11 @@ input:-webkit-autofill:focus {
   gap: 6px;
 }
 
+/* Legend swatches echo the bar mark, not the old line mark. */
 .flow-swatch {
-  width: 14px;
-  height: 3px;
-  border-radius: 999px;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
 }
 
 .flow-key.income .flow-swatch {
@@ -1241,10 +1242,6 @@ input:-webkit-autofill:focus {
   stroke: var(--chart-grid-faint);
 }
 
-.flow-chart .fg-dash {
-  stroke: var(--chart-grid-dash);
-}
-
 .flow-chart .fg-grid {
   stroke: var(--chart-grid);
 }
@@ -1253,17 +1250,69 @@ input:-webkit-autofill:focus {
   stroke: var(--chart-grid-zero);
 }
 
-.flow-chart .fg-guide {
-  stroke: var(--chart-guide);
+/* Bars take the same semantic hues the summary cards and ledger rows
+   use, so a green figure is green everywhere on the page. */
+.flow-bar-income {
+  fill: var(--income);
 }
 
-/* Data-point centers read as a "hole" in the line that matches the
-   card surface behind the chart. */
-.flow-hole {
-  fill: var(--surface-1);
+.flow-bar-expense {
+  fill: var(--expense);
 }
 
-.flow-halo {
-  stroke: var(--surface-1);
+/* The hovered month's band, lifted out of the plot so the pair being
+   read is obvious without a crosshair. */
+.flow-band {
+  fill: var(--chart-grid);
+}
+
+/* Texture fallback — the second identity channel, for when hue is not
+   available (greyscale print, forced-colors). Angles are 45° and its
+   135° mirror, inked tone-on-tone. Never painted unless a media query
+   below opts in. */
+.flow-tex-base-income {
+  fill: var(--income);
+}
+
+.flow-tex-ink-income {
+  stroke: var(--income-deep);
+}
+
+.flow-tex-base-expense {
+  fill: var(--expense);
+}
+
+.flow-tex-ink-expense {
+  stroke: var(--expense-deep);
+}
+
+@media print, (forced-colors: active) {
+  .flow-bar {
+    forced-color-adjust: none;
+  }
+
+  .flow-bar-income {
+    fill: url(#flow-texture-income);
+  }
+
+  .flow-bar-expense {
+    fill: url(#flow-texture-expense);
+  }
+
+  .flow-key.income .flow-swatch {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--income) 0 4px,
+      var(--income-deep) 4px 7px
+    );
+  }
+
+  .flow-key.expense .flow-swatch {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--expense) 0 4px,
+      var(--expense-deep) 4px 7px
+    );
+  }
 }
 

@@ -306,6 +306,30 @@ type FlowPoint = {
 const FLOW_HEIGHT = 240;
 const FLOW_PAD = { top: 18, right: 18, bottom: 30, left: 58 };
 
+/* Bar geometry. Bars cap at 24px thick and never fill their month band —
+   the leftover width stays as air, and a 2px gap in the surface colour
+   separates the income/expense pair. Caps are rounded, feet are square
+   on the baseline. */
+const BAR_MAX = 24;
+const BAR_MIN = 3;
+const BAR_GAP = 2;
+const BAR_RADIUS = 4;
+const BAR_BAND_SHARE = 0.72;
+
+/* A column: rounded top, square foot, grown from the baseline. */
+function barPath(x: number, y: number, width: number, height: number) {
+  const radius = Math.max(0, Math.min(BAR_RADIUS, width / 2, height));
+
+  return (
+    `M ${x} ${y + height} ` +
+    `L ${x} ${y + radius} ` +
+    `Q ${x} ${y} ${x + radius} ${y} ` +
+    `L ${x + width - radius} ${y} ` +
+    `Q ${x + width} ${y} ${x + width} ${y + radius} ` +
+    `L ${x + width} ${y + height} Z`
+  );
+}
+
 function CashFlowChart({
   income,
   expenses,
@@ -408,86 +432,36 @@ function CashFlowChart({
     Math.max(0.01, ...points.flatMap((point) => [point.income, point.expense]))
   );
 
-  const xStep = points.length > 1 ? innerWidth / (points.length - 1) : innerWidth;
-  const xAt = (index: number) => FLOW_PAD.left + index * xStep;
+  /* One band per month. The income/expense pair is centred in its band
+     and the band's leftover width stays as air, so neighbouring months
+     never read as one block. */
+  const bandWidth = innerWidth / Math.max(1, points.length);
+  const pairTarget = Math.min(bandWidth * BAR_BAND_SHARE, BAR_MAX * 2 + BAR_GAP);
+  const barWidth = Math.max(BAR_MIN, (pairTarget - BAR_GAP) / 2);
+  const pairWidth = barWidth * 2 + BAR_GAP;
+
+  const bandLeft = (index: number) => FLOW_PAD.left + index * bandWidth;
+  const bandCenter = (index: number) => bandLeft(index) + bandWidth / 2;
+  const pairLeft = (index: number) => bandCenter(index) - pairWidth / 2;
+
+  const barHeight = (value: number) =>
+    value > 0 ? Math.max(1, (value / maxValue) * innerHeight) : 0;
+  const barY = (value: number) =>
+    FLOW_PAD.top + innerHeight - barHeight(value);
   const yAt = (value: number) =>
     FLOW_PAD.top + innerHeight - (value / maxValue) * innerHeight;
 
-  const seriesPoints = (key: "income" | "expense") =>
-    points.map((point) => yAt(point[key]).toFixed(1));
-
-  const linePath = (values: string[]) =>
-    values
-      .map(
-        (value, index) =>
-          `${index === 0 ? "M" : "L"}${xAt(index).toFixed(1)} ${value}`
-      )
-      .join(" ");
-
-  const incomePts = seriesPoints("income");
-  const expensePts = seriesPoints("expense");
+  /* Income is always the left bar, expenses always the right one — the
+     order is part of the encoding, not just decoration. */
+  const barX = (index: number, series: "income" | "expense") =>
+    series === "income" ? pairLeft(index) : pairLeft(index) + barWidth + BAR_GAP;
 
   const gridValues = [maxValue, maxValue / 2, 0];
   const gridTicks = [maxValue * 0.75, maxValue * 0.25];
   const labelStride = Math.max(
     1,
-    Math.ceil((points.length * 54) / Math.max(1, innerWidth))
+    Math.ceil(54 / Math.max(1, bandWidth))
   );
-  const labeledIndexes = points
-    .map((_, index) => index)
-    .filter((index) => index % labelStride === 0);
-  const showDots = points.length <= 12;
-
-  /* Slice the space between the two lines into month segments so the
-     dominant series is visible at a glance. Segments are split where the
-     lines cross, keeping the colour honest through a change of leader. */
-  const gapSegments = (() => {
-    const segments: { d: string; color: string }[] = [];
-
-    for (let index = 0; index < points.length - 1; index++) {
-      const x0 = xAt(index);
-      const x1 = xAt(index + 1);
-      const i0 = Number(incomePts[index]);
-      const e0 = Number(expensePts[index]);
-      const i1 = Number(incomePts[index + 1]);
-      const e1 = Number(expensePts[index + 1]);
-      const d0 = e0 - i0;
-      const d1 = e1 - i1;
-
-      const push = (
-        xL: number,
-        iL: number,
-        eL: number,
-        xR: number,
-        iR: number,
-        eR: number
-      ) => {
-        const pos = eL + eR - (iL + iR) > 0;
-        segments.push({
-          d: `M ${xL.toFixed(1)} ${iL.toFixed(1)} L ${xL.toFixed(1)} ${eL.toFixed(
-            1
-          )} L ${xR.toFixed(1)} ${eR.toFixed(1)} L ${xR.toFixed(1)} ${iR.toFixed(
-            1
-          )} Z`,
-          color: pos ? "#10B981" : "#F43F5E",
-        });
-      };
-
-      if ((d0 >= 0 && d1 >= 0) || (d0 <= 0 && d1 <= 0)) {
-        push(x0, i0, e0, x1, i1, e1);
-      } else {
-        const f = d0 / (d0 - d1);
-        const xm = x0 + f * (x1 - x0);
-        const im = i0 + f * (i1 - i0);
-        const em = e0 + f * (e1 - e0);
-
-        push(x0, i0, e0, xm, im, em);
-        push(xm, im, em, x1, i1, e1);
-      }
-    }
-
-    return segments;
-  })();
 
   /* A one-line verdict computed from the same data as the chart. */
   const insight = (() => {
@@ -535,7 +509,7 @@ function CashFlowChart({
   const handleChartMove = (event: ReactMouseEvent<SVGSVGElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
-    const index = Math.round((x - FLOW_PAD.left) / xStep);
+    const index = Math.floor((x - FLOW_PAD.left) / bandWidth);
 
     setHover(Math.min(points.length - 1, Math.max(0, index)));
   };
@@ -547,7 +521,7 @@ function CashFlowChart({
   const tipLeft =
     hoverIndex !== null
       ? Math.min(
-          Math.max(xAt(hoverIndex), tipHalf),
+          Math.max(bandCenter(hoverIndex), tipHalf),
           Math.max(tipHalf, width - tipHalf)
         )
       : 0;
@@ -564,25 +538,62 @@ function CashFlowChart({
         height={FLOW_HEIGHT}
         viewBox={`0 0 ${width} ${FLOW_HEIGHT}`}
         role="img"
-        aria-label="Income and expenses over time"
+        aria-label="Income and expenses by month"
         onMouseMove={handleChartMove}
         onMouseLeave={() => setHover(null)}
       >
-        {gridTicks.map((value) => {
-          const y = yAt(value);
-
-          return (
+        {/* Texture is the backup identity channel: where hue fails —
+            greyscale print, forced-colors — each series keeps its own
+            angle. CSS swaps these in; they are never on by default. */}
+        <defs>
+          <pattern
+            id="flow-texture-income"
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
+            <rect width="6" height="6" className="flow-tex-base-income" />
             <line
-              key={`tick-${value}`}
-              x1={FLOW_PAD.left}
-              y1={y}
-              x2={width - FLOW_PAD.right}
-              y2={y}
-              className="fg-dash"
-              strokeDasharray="2 6"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="6"
+              strokeWidth="2.5"
+              className="flow-tex-ink-income"
             />
-          );
-        })}
+          </pattern>
+
+          <pattern
+            id="flow-texture-expense"
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(135)"
+          >
+            <rect width="6" height="6" className="flow-tex-base-expense" />
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="6"
+              strokeWidth="2.5"
+              className="flow-tex-ink-expense"
+            />
+          </pattern>
+        </defs>
+
+        {/* Grid is solid hairlines — dashing reads as "threshold". */}
+        {gridTicks.map((value) => (
+          <line
+            key={`tick-${value}`}
+            x1={FLOW_PAD.left}
+            y1={yAt(value)}
+            x2={width - FLOW_PAD.right}
+            y2={yAt(value)}
+            className="fg-faint"
+          />
+        ))}
 
         {gridValues.map((value) => {
           const y = yAt(value);
@@ -595,7 +606,6 @@ function CashFlowChart({
                 x2={width - FLOW_PAD.right}
                 y2={y}
                 className={value === 0 ? "fg-zero" : "fg-grid"}
-                strokeDasharray={value === 0 ? undefined : "4 4"}
               />
               <text
                 x={FLOW_PAD.left - 8}
@@ -609,147 +619,55 @@ function CashFlowChart({
           );
         })}
 
-        {labeledIndexes.map((index) => {
-          const x = xAt(index);
+        {/* The hovered month, lifted out of the plot before the bars. */}
+        {hoverIndex !== null && (
+          <rect
+            className="flow-band"
+            x={bandLeft(hoverIndex)}
+            y={FLOW_PAD.top}
+            width={bandWidth}
+            height={innerHeight}
+          />
+        )}
+
+        {points.map((point, index) => {
+          const incomeHeight = barHeight(point.income);
+          const expenseHeight = barHeight(point.expense);
 
           return (
-            <line
-              key={`vline-${index}`}
-              x1={x}
-              y1={FLOW_PAD.top}
-              x2={x}
-              y2={FLOW_PAD.top + innerHeight}
-              className="fg-faint"
-            />
+            <g key={point.month}>
+              {incomeHeight > 0 && (
+                <path
+                  className="flow-bar flow-bar-income"
+                  d={barPath(
+                    barX(index, "income"),
+                    barY(point.income),
+                    barWidth,
+                    incomeHeight
+                  )}
+                />
+              )}
+
+              {expenseHeight > 0 && (
+                <path
+                  className="flow-bar flow-bar-expense"
+                  d={barPath(
+                    barX(index, "expense"),
+                    barY(point.expense),
+                    barWidth,
+                    expenseHeight
+                  )}
+                />
+              )}
+            </g>
           );
         })}
-
-        {gapSegments.map((segment, index) => (
-          <path
-            key={`gap-${index}`}
-            d={segment.d}
-            fill={segment.color}
-            opacity={0.16}
-          />
-        ))}
-
-        {hoverIndex !== null && (
-          <line
-            x1={xAt(hoverIndex)}
-            y1={FLOW_PAD.top}
-            x2={xAt(hoverIndex)}
-            y2={FLOW_PAD.top + innerHeight}
-            className="fg-guide"
-            strokeDasharray="3 3"
-          />
-        )}
-
-        {/* soft glow under the main lines */}
-        <path
-          d={linePath(incomePts)}
-          fill="none"
-          stroke="#10B981"
-          strokeWidth={6}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={0.14}
-        />
-        <path
-          d={linePath(expensePts)}
-          fill="none"
-          stroke="#F43F5E"
-          strokeWidth={6}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={0.14}
-        />
-
-        <path
-          d={linePath(incomePts)}
-          fill="none"
-          stroke="#10B981"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-        <path
-          d={linePath(expensePts)}
-          fill="none"
-          stroke="#F43F5E"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-
-        {showDots &&
-          incomePts.map((value, index) => (
-            <circle
-              key={`income-${index}`}
-              cx={xAt(index)}
-              cy={value}
-              r={3}
-              className="flow-hole"
-              stroke="#10B981"
-              strokeWidth={2}
-            />
-          ))}
-
-        {showDots &&
-          expensePts.map((value, index) => (
-            <circle
-              key={`expense-${index}`}
-              cx={xAt(index)}
-              cy={value}
-              r={3}
-              className="flow-hole"
-              stroke="#F43F5E"
-              strokeWidth={2}
-            />
-          ))}
-
-        <circle
-          cx={xAt(points.length - 1)}
-          cy={Number(incomePts[points.length - 1])}
-          r={4.5}
-          className="flow-hole"
-          stroke="#10B981"
-          strokeWidth={2.5}
-        />
-        <circle
-          cx={xAt(points.length - 1)}
-          cy={Number(expensePts[points.length - 1])}
-          r={4.5}
-          className="flow-hole"
-          stroke="#F43F5E"
-          strokeWidth={2.5}
-        />
-
-        {hoverIndex !== null && (
-          <>
-            <circle
-              cx={xAt(hoverIndex)}
-              cy={Number(incomePts[hoverIndex])}
-              r={5.5}
-              fill="#10B981"
-              className="flow-halo"
-              strokeWidth={2}
-            />
-            <circle
-              cx={xAt(hoverIndex)}
-              cy={Number(expensePts[hoverIndex])}
-              r={5.5}
-              fill="#F43F5E"
-              className="flow-halo"
-              strokeWidth={2}
-            />
-          </>
-        )}
 
         {points.map((point, index) =>
           index % labelStride === 0 ? (
             <text
               key={point.month}
-              x={xAt(index)}
+              x={bandCenter(index)}
               y={FLOW_HEIGHT - 8}
               textAnchor="middle"
               className="flow-axis"
@@ -1034,14 +952,15 @@ function App() {
     [selectedDebts]
   );
 
-  const totalDebtRepaid = useMemo(
-    () =>
-      debtRepayments.reduce(
-        (total, repayment) => total + Number(repayment.amount),
-        0
-      ),
-    [debtRepayments]
-  );
+  /* Repayments carry only their parent's id, so scope them to the selected
+     space through the debts/credits already filtered above. */
+  const totalDebtRepaid = useMemo(() => {
+    const debtIds = new Set(selectedDebts.map((debt) => debt.id));
+
+    return debtRepayments
+      .filter((repayment) => debtIds.has(repayment.debt_id))
+      .reduce((total, repayment) => total + Number(repayment.amount), 0);
+  }, [debtRepayments, selectedDebts]);
 
   const totalCredit = useMemo(
     () =>
@@ -1052,14 +971,13 @@ function App() {
     [selectedCredits]
   );
 
-  const totalCreditRepaid = useMemo(
-    () =>
-      creditRepayments.reduce(
-        (total, repayment) => total + Number(repayment.amount),
-        0
-      ),
-    [creditRepayments]
-  );
+  const totalCreditRepaid = useMemo(() => {
+    const creditIds = new Set(selectedCredits.map((credit) => credit.id));
+
+    return creditRepayments
+      .filter((repayment) => creditIds.has(repayment.credit_id))
+      .reduce((total, repayment) => total + Number(repayment.amount), 0);
+  }, [creditRepayments, selectedCredits]);
 
   const outstandingDebt = totalDebt - totalDebtRepaid;
   const outstandingCredit = totalCredit - totalCreditRepaid;
@@ -2257,8 +2175,8 @@ function App() {
                 <div className="flow-head">
                   <h3>Cash Flow</h3>
                   <p className="flow-subtitle">
-                    Income vs expenses — the shaded band shows which one was
-                    on top each month.
+                    Income vs expenses, month by month — income is always the
+                    left bar, expenses the right.
                   </p>
                 </div>
                 <div className="flow-legend">
