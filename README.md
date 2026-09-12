@@ -129,7 +129,24 @@ All routes below require `Authorization: Bearer <token>`, except registration an
 | `GET/POST` | `/debt-repayments` | List / create debt repayments |
 | `GET/POST` | `/credits` | List / create credits (owed to you) |
 | `GET/POST` | `/credit-repayments` | List / create credit repayments |
-| `GET` | `/dashboard` | Dashboard summary |
+| `GET` | `/dashboard` | Dashboard totals + monthly cash flow |
+
+### `GET /dashboard`
+
+Accepts an optional `finance_space_id`:
+
+```
+GET /dashboard                     → totals across every space you own
+GET /dashboard?finance_space_id=3  → totals for space 3 only
+```
+
+The response carries every figure the dashboard tiles need — totals, repaid and
+outstanding for debts and credits — plus a `monthly` array of `{month, income,
+expense}` buckets for the cash-flow chart, all computed in SQL. A
+`finance_space_id` belonging to another user is not an error; it returns zeros.
+
+`finance_space_id` is echoed back in the response so a slow reply for the
+previous space can be discarded after the user has switched away.
 
 ## Deployment
 
